@@ -45,7 +45,25 @@ class ProductRepositoryImpl implements ProductRepository {
   @override
   Future<Either<Failure, void>> updateProduct(ProductEntity product) async {
     try {
-      final productModel = product as ProductModel;
+      // Convert ProductEntity to ProductModel
+      final productModel = ProductModel(
+        id: product.id,
+        userId: product.userId,
+        name: product.name,
+        description: product.description,
+        category: product.category,
+        hsnCode: product.hsnCode,
+        sellingPrice: product.sellingPrice,
+        purchasePrice: product.purchasePrice,
+        unit: product.unit,
+        gstRate: product.gstRate,
+        stock: product.stock,
+        minStock: product.minStock,
+        imageUrl: product.imageUrl,
+        trackStock: product.trackStock,
+        createdAt: product.createdAt,
+        updatedAt: product.updatedAt,
+      );
       await remoteDataSource.updateProduct(productModel);
       return const Right(null);
     } on ServerException catch (e) {

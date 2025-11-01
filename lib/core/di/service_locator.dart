@@ -28,6 +28,13 @@ import '../../features/product/domain/usecases/get_all_products_usecase.dart';
 import '../../features/product/domain/usecases/update_product_usecase.dart';
 import '../../features/product/domain/usecases/delete_product_usecase.dart';
 import '../../features/product/presentation/providers/product_provider.dart';
+import '../../features/invoice/data/datasources/invoice_remote_datasource.dart';
+import '../../features/invoice/data/repositories/invoice_repository_impl.dart';
+import '../../features/invoice/domain/repositories/invoice_repository.dart';
+import '../../features/invoice/domain/usecases/add_invoice_usecase.dart';
+import '../../features/invoice/domain/usecases/get_all_invoices_usecase.dart';
+import '../../features/invoice/domain/usecases/update_invoice_status_usecase.dart';
+import '../../features/invoice/presentation/providers/invoice_provider.dart';
 
 final sl = GetIt.instance;
 
@@ -132,6 +139,31 @@ Future<void> init() async {
       getAllProductsUsecase: sl(),
       updateProductUsecase: sl(),
       deleteProductUsecase: sl(),
+    ),
+  );
+
+  // ========== Invoice Feature ==========
+  // Data Sources
+  sl.registerLazySingleton<InvoiceRemoteDataSource>(
+    () => InvoiceRemoteDataSourceImpl(firestore: sl()),
+  );
+
+  // Repositories
+  sl.registerLazySingleton<InvoiceRepository>(
+    () => InvoiceRepositoryImpl(remoteDataSource: sl()),
+  );
+
+  // Use Cases
+  sl.registerLazySingleton(() => AddInvoiceUsecase(sl()));
+  sl.registerLazySingleton(() => GetAllInvoicesUsecase(sl()));
+  sl.registerLazySingleton(() => UpdateInvoiceStatusUsecase(sl()));
+
+  // Providers
+  sl.registerFactory(
+    () => InvoiceProvider(
+      addInvoiceUsecase: sl(),
+      getAllInvoicesUsecase: sl(),
+      updateInvoiceStatusUsecase: sl(),
     ),
   );
 }

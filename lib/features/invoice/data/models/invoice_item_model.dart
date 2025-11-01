@@ -35,6 +35,24 @@ class InvoiceItemModel extends InvoiceItemEntity {
     );
   }
 
+  factory InvoiceItemModel.fromEntity(InvoiceItemEntity entity) {
+    return InvoiceItemModel(
+      productId: entity.productId,
+      productName: entity.productName,
+      hsnCode: entity.hsnCode,
+      quantity: entity.quantity,
+      unit: entity.unit,
+      rate: entity.rate,
+      discount: entity.discount,
+      gstRate: entity.gstRate,
+      cgst: entity.cgst,
+      sgst: entity.sgst,
+      igst: entity.igst,
+      taxableAmount: entity.taxableAmount,
+      totalAmount: entity.totalAmount,
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'productId': productId,

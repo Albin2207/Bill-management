@@ -63,9 +63,9 @@ class _BillsPageState extends State<BillsPage> with SingleTickerProviderStateMix
         _buildDocumentTypeButton(
           icon: Icons.receipt_long,
           label: 'Invoice',
-          subtitle: 'Create sales invoice',
+          subtitle: 'View & create sales invoices',
           color: Colors.blue,
-          onTap: () => Navigator.pushNamed(context, AppRouter.createInvoice),
+          onTap: () => Navigator.pushNamed(context, AppRouter.invoices),
         ),
         const SizedBox(height: 12),
         _buildDocumentTypeButton(

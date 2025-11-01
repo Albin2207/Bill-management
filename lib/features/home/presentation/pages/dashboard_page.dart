@@ -2,15 +2,147 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../invoice/presentation/providers/invoice_provider.dart';
+import '../../../invoice/domain/entities/invoice_entity.dart';
 import '../../../../core/navigation/app_router.dart';
 import '../widgets/quick_action_card.dart';
 import '../widgets/document_type_card.dart';
 
-class DashboardPage extends StatelessWidget {
+class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
 
   @override
+  State<DashboardPage> createState() => _DashboardPageState();
+}
+
+class _DashboardPageState extends State<DashboardPage> {
+  String _selectedDateFilter = 'Today';
+  final List<String> _dateFilters = [
+    'Today',
+    'Yesterday',
+    'This Week',
+    'Last Week',
+    'This Month',
+    'Last Month',
+    'This Year',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadDashboardData();
+    });
+  }
+
+  void _loadDashboardData() {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final invoiceProvider = Provider.of<InvoiceProvider>(context, listen: false);
+    
+    final userId = authProvider.user?.uid;
+    if (userId != null) {
+      invoiceProvider.loadInvoices(userId);
+    }
+  }
+
+  List<InvoiceEntity> _getFilteredInvoices(List<InvoiceEntity> invoices) {
+    final now = DateTime.now();
+    DateTime startDate;
+    DateTime endDate = DateTime(now.year, now.month, now.day, 23, 59, 59);
+
+    switch (_selectedDateFilter) {
+      case 'Today':
+        startDate = DateTime(now.year, now.month, now.day);
+        break;
+      case 'Yesterday':
+        final yesterday = now.subtract(const Duration(days: 1));
+        startDate = DateTime(yesterday.year, yesterday.month, yesterday.day);
+        endDate = DateTime(yesterday.year, yesterday.month, yesterday.day, 23, 59, 59);
+        break;
+      case 'This Week':
+        startDate = now.subtract(Duration(days: now.weekday - 1));
+        startDate = DateTime(startDate.year, startDate.month, startDate.day);
+        break;
+      case 'Last Week':
+        final lastWeek = now.subtract(Duration(days: now.weekday + 6));
+        startDate = DateTime(lastWeek.year, lastWeek.month, lastWeek.day);
+        endDate = startDate.add(const Duration(days: 6, hours: 23, minutes: 59, seconds: 59));
+        break;
+      case 'This Month':
+        startDate = DateTime(now.year, now.month, 1);
+        break;
+      case 'Last Month':
+        final lastMonth = DateTime(now.year, now.month - 1, 1);
+        startDate = lastMonth;
+        endDate = DateTime(now.year, now.month, 0, 23, 59, 59);
+        break;
+      case 'This Year':
+        startDate = DateTime(now.year, 1, 1);
+        break;
+      default:
+        startDate = DateTime(now.year, now.month, now.day);
+    }
+
+    return invoices.where((invoice) {
+      return invoice.invoiceDate.isAfter(startDate.subtract(const Duration(seconds: 1))) &&
+             invoice.invoiceDate.isBefore(endDate.add(const Duration(seconds: 1)));
+    }).toList();
+  }
+
+  double _calculateSales(List<InvoiceEntity> invoices) {
+    return invoices
+        .where((i) => i.invoiceType == InvoiceType.invoice && 
+                     i.paymentStatus != PaymentStatus.cancelled)
+        .fold(0.0, (sum, invoice) => sum + invoice.grandTotal);
+  }
+
+  double _calculatePurchases(List<InvoiceEntity> invoices) {
+    return invoices
+        .where((i) => i.invoiceType == InvoiceType.bill && 
+                     i.paymentStatus != PaymentStatus.cancelled)
+        .fold(0.0, (sum, invoice) => sum + invoice.grandTotal);
+  }
+
+  double _calculateTotalRevenue(List<InvoiceEntity> invoices) {
+    return invoices
+        .where((i) => i.paymentStatus == PaymentStatus.paid)
+        .fold(0.0, (sum, invoice) => sum + invoice.grandTotal);
+  }
+
+  double _calculateGSTCollected(List<InvoiceEntity> invoices) {
+    return invoices
+        .where((i) => i.invoiceType == InvoiceType.invoice && 
+                     i.paymentStatus == PaymentStatus.paid)
+        .fold(0.0, (sum, invoice) => sum + invoice.totalTax);
+  }
+
+  double _calculateReceivables(List<InvoiceEntity> invoices) {
+    return invoices
+        .where((i) => i.invoiceType == InvoiceType.invoice && 
+                     i.paymentStatus != PaymentStatus.paid &&
+                     i.paymentStatus != PaymentStatus.cancelled)
+        .fold(0.0, (sum, invoice) => sum + invoice.balanceAmount);
+  }
+
+  double _calculatePayables(List<InvoiceEntity> invoices) {
+    return invoices
+        .where((i) => i.invoiceType == InvoiceType.bill && 
+                     i.paymentStatus != PaymentStatus.paid &&
+                     i.paymentStatus != PaymentStatus.cancelled)
+        .fold(0.0, (sum, invoice) => sum + invoice.balanceAmount);
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final invoiceProvider = Provider.of<InvoiceProvider>(context);
+    final filteredInvoices = _getFilteredInvoices(invoiceProvider.invoices);
+    
+    final salesAmount = _calculateSales(filteredInvoices);
+    final purchasesAmount = _calculatePurchases(filteredInvoices);
+    final totalRevenue = _calculateTotalRevenue(filteredInvoices);
+    final gstCollected = _calculateGSTCollected(filteredInvoices);
+    final receivables = _calculateReceivables(invoiceProvider.invoices); // All time
+    final payables = _calculatePayables(invoiceProvider.invoices); // All time
     return Scaffold(
       appBar: AppBar(
         title: const Text('Home'),
@@ -85,14 +217,49 @@ class DashboardPage extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             
-            // Today's Summary
-            Text(
-              "Today's Summary",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: AppColors.onBackground,
-              ),
+            // Date Filter
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Business Overview',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.onBackground,
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: AppColors.primary),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: _selectedDateFilter,
+                      isDense: true,
+                      style: TextStyle(
+                        color: AppColors.primary,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      items: _dateFilters.map((filter) {
+                        return DropdownMenuItem(
+                          value: filter,
+                          child: Text(filter),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedDateFilter = value!;
+                        });
+                        // TODO: Reload data based on filter
+                      },
+                    ),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 12),
             Row(
@@ -100,7 +267,7 @@ class DashboardPage extends StatelessWidget {
                 Expanded(
                   child: _buildTodayStatCard(
                     'Sales',
-                    '₹0',
+                    '₹${salesAmount.toStringAsFixed(2)}',
                     Icons.trending_up,
                     Colors.green,
                   ),
@@ -108,19 +275,10 @@ class DashboardPage extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: _buildTodayStatCard(
-                    'Invoices',
-                    '0',
-                    Icons.receipt_long,
-                    AppColors.primary,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _buildTodayStatCard(
-                    'Revenue',
-                    '₹0',
-                    Icons.account_balance_wallet,
-                    Colors.blue,
+                    'Purchases',
+                    '₹${purchasesAmount.toStringAsFixed(2)}',
+                    Icons.shopping_cart,
+                    Colors.orange,
                   ),
                 ),
               ],
@@ -189,19 +347,19 @@ class DashboardPage extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             GridView.count(
-              crossAxisCount: 3,
+              crossAxisCount: 2,
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
-              childAspectRatio: 0.95,
+              childAspectRatio: 1.5,
               children: [
                 DocumentTypeCard(
                   title: 'Invoice',
                   icon: Icons.receipt_long,
                   color: Colors.blue,
                   onTap: () {
-                    Navigator.pushNamed(context, AppRouter.createInvoice);
+                    Navigator.pushNamed(context, AppRouter.invoices);
                   },
                 ),
                 DocumentTypeCard(
@@ -382,25 +540,17 @@ class DashboardPage extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      _buildAnalyticsItem('Total Revenue', '₹0', Icons.trending_up),
-                      _buildAnalyticsItem('GST Collected', '₹0', Icons.account_balance),
+                      _buildAnalyticsItem('Total Revenue', '₹${totalRevenue.toStringAsFixed(2)}', Icons.trending_up),
+                      _buildAnalyticsItem('GST Collected', '₹${gstCollected.toStringAsFixed(2)}', Icons.account_balance),
                     ],
                   ),
                   const SizedBox(height: 16),
-                  Container(
-                    height: 100,
-                    decoration: BoxDecoration(
-                      color: AppColors.background,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Center(
-                      child: Text(
-                        'Chart will be displayed here',
-                        style: TextStyle(
-                          color: AppColors.onBackground.withOpacity(0.5),
-                        ),
-                      ),
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _buildAnalyticsItem('Receivables', '₹${receivables.toStringAsFixed(2)}', Icons.call_received, color: Colors.orange),
+                      _buildAnalyticsItem('Payables', '₹${payables.toStringAsFixed(2)}', Icons.call_made, color: Colors.red),
+                    ],
                   ),
                 ],
               ),
@@ -592,10 +742,11 @@ class DashboardPage extends StatelessWidget {
     );
   }
 
-  Widget _buildAnalyticsItem(String label, String value, IconData icon) {
+  Widget _buildAnalyticsItem(String label, String value, IconData icon, {Color? color}) {
+    final iconColor = color ?? AppColors.primary;
     return Column(
       children: [
-        Icon(icon, color: AppColors.primary, size: 32),
+        Icon(icon, color: iconColor, size: 32),
         const SizedBox(height: 8),
         Text(
           value,

@@ -8,6 +8,7 @@ import 'core/constants/app_colors.dart';
 import 'features/auth/presentation/providers/auth_provider.dart';
 import 'features/party/presentation/providers/party_provider.dart';
 import 'features/product/presentation/providers/product_provider.dart';
+import 'features/invoice/presentation/providers/invoice_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -74,6 +75,9 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (_) => di.sl<ProductProvider>(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => di.sl<InvoiceProvider>(),
         ),
       ],
       child: MaterialApp(

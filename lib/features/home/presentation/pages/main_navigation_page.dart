@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/navigation/app_router.dart';
 import 'dashboard_page.dart';
-import '../../../bill/presentation/pages/bills_list_page.dart';
+import '../../../bill/presentation/pages/bills_page.dart';
 import '../../../product/presentation/pages/products_list_page.dart';
 import '../../../party/presentation/pages/parties_list_page.dart';
 import '../../../settings/presentation/pages/more_page.dart';
@@ -19,7 +19,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
 
   final List<Widget> _pages = [
     const DashboardPage(),
-    const BillsListPage(),
+    const BillsPage(),
     const ProductsListPage(),
     const PartiesListPage(),
     const MorePage(),

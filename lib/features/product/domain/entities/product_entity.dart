@@ -53,6 +53,44 @@ class ProductEntity extends Equatable {
     return stock <= minStock!;
   }
 
+  ProductEntity copyWith({
+    String? id,
+    String? userId,
+    String? name,
+    String? description,
+    String? category,
+    String? hsnCode,
+    double? sellingPrice,
+    double? purchasePrice,
+    ProductUnit? unit,
+    double? gstRate,
+    double? stock,
+    double? minStock,
+    String? imageUrl,
+    bool? trackStock,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    return ProductEntity(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      category: category ?? this.category,
+      hsnCode: hsnCode ?? this.hsnCode,
+      sellingPrice: sellingPrice ?? this.sellingPrice,
+      purchasePrice: purchasePrice ?? this.purchasePrice,
+      unit: unit ?? this.unit,
+      gstRate: gstRate ?? this.gstRate,
+      stock: stock ?? this.stock,
+      minStock: minStock ?? this.minStock,
+      imageUrl: imageUrl ?? this.imageUrl,
+      trackStock: trackStock ?? this.trackStock,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
   @override
   List<Object?> get props => [
         id,

@@ -83,6 +83,41 @@ class InvoiceModel extends InvoiceEntity {
     );
   }
 
+  factory InvoiceModel.fromEntity(InvoiceEntity entity) {
+    return InvoiceModel(
+      id: entity.id,
+      invoiceNumber: entity.invoiceNumber,
+      invoiceType: entity.invoiceType,
+      invoiceDate: entity.invoiceDate,
+      dueDate: entity.dueDate,
+      partyId: entity.partyId,
+      partyName: entity.partyName,
+      partyGstin: entity.partyGstin,
+      partyAddress: entity.partyAddress,
+      partyCity: entity.partyCity,
+      partyState: entity.partyState,
+      partyPhone: entity.partyPhone,
+      items: entity.items,
+      subtotal: entity.subtotal,
+      totalDiscount: entity.totalDiscount,
+      taxableAmount: entity.taxableAmount,
+      cgst: entity.cgst,
+      sgst: entity.sgst,
+      igst: entity.igst,
+      totalTax: entity.totalTax,
+      grandTotal: entity.grandTotal,
+      paymentStatus: entity.paymentStatus,
+      paidAmount: entity.paidAmount,
+      balanceAmount: entity.balanceAmount,
+      notes: entity.notes,
+      termsAndConditions: entity.termsAndConditions,
+      isInterState: entity.isInterState,
+      userId: entity.userId,
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -97,7 +132,7 @@ class InvoiceModel extends InvoiceEntity {
       'partyCity': partyCity,
       'partyState': partyState,
       'partyPhone': partyPhone,
-      'items': items.map((item) => (item as InvoiceItemModel).toJson()).toList(),
+      'items': items.map((item) => InvoiceItemModel.fromEntity(item).toJson()).toList(),
       'subtotal': subtotal,
       'totalDiscount': totalDiscount,
       'taxableAmount': taxableAmount,

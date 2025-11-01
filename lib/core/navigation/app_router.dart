@@ -15,6 +15,7 @@ import '../../features/party/presentation/pages/add_party_page.dart';
 import '../../features/product/presentation/pages/products_list_page.dart';
 import '../../features/product/presentation/pages/add_product_page.dart';
 import '../../features/report/presentation/pages/reports_page.dart';
+import '../../features/home/presentation/pages/insights_page.dart';
 import '../../features/gst_return/presentation/pages/gst_returns_page.dart';
 import '../../features/ledger/presentation/pages/ledger_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
@@ -103,13 +104,12 @@ class AppRouter {
       
       // Invoice Routes
       case invoices:
-        return MaterialPageRoute(builder: (_) => const InvoicesListPage());
       case createInvoice:
-        return MaterialPageRoute(builder: (_) => const CreateInvoicePage());
+        return MaterialPageRoute(builder: (_) => const InvoicesListPage());
       
       // Bill Routes
       case bills:
-        return MaterialPageRoute(builder: (_) => const BillsListPage());
+        return MaterialPageRoute(builder: (_) => const BillsPage());
       case createBill:
         return MaterialPageRoute(builder: (_) => const CreateBillPage());
       
@@ -145,30 +145,61 @@ class AppRouter {
       case addParty:
         return MaterialPageRoute(builder: (_) => const AddPartyPage());
       
-      // Sales Documents
+      // Sales Documents (List Pages)
       case createSalesOrder:
+        return MaterialPageRoute(
+          builder: (_) => const PlaceholderPage(title: 'Sales Orders'),
+        );
       case createCreditNote:
+        return MaterialPageRoute(
+          builder: (_) => const PlaceholderPage(title: 'Credit Notes'),
+        );
       case createProForma:
+        return MaterialPageRoute(
+          builder: (_) => const PlaceholderPage(title: 'Pro Forma Invoices'),
+        );
       
-      // Purchase Documents
+      // Purchase Documents (List Pages)
       case createPurchase:
+        return MaterialPageRoute(
+          builder: (_) => const PlaceholderPage(title: 'Purchases'),
+        );
       case createPurchaseOrder:
+        return MaterialPageRoute(
+          builder: (_) => const PlaceholderPage(title: 'Purchase Orders'),
+        );
       case createDebitNote:
+        return MaterialPageRoute(
+          builder: (_) => const PlaceholderPage(title: 'Debit Notes'),
+        );
       
-      // Quotation
+      // Quotation (List Page)
       case createQuotation:
+        return MaterialPageRoute(
+          builder: (_) => const PlaceholderPage(title: 'Quotations'),
+        );
       
-      // Other Documents
+      // Other Documents (List Pages)
       case createDeliveryChallan:
+        return MaterialPageRoute(
+          builder: (_) => const PlaceholderPage(title: 'Delivery Challans'),
+        );
       case createExpense:
+        return MaterialPageRoute(
+          builder: (_) => const PlaceholderPage(title: 'Expenses'),
+        );
       case createIndirectIncome:
+        return MaterialPageRoute(
+          builder: (_) => const PlaceholderPage(title: 'Indirect Income'),
+        );
       
       // Quick Access
+      case insights:
+        return MaterialPageRoute(builder: (_) => const InsightsPage());
       case businessProfile:
       case eWayBill:
       case eInvoice:
       case paymentsTimeline:
-      case insights:
       case invoiceTemplates:
       case documentSettings:
       case backupRestore:
@@ -216,10 +247,12 @@ class AppRouter {
 // Placeholder page for routes under development
 class PlaceholderPage extends StatelessWidget {
   final String title;
+  final bool showFAB;
 
   const PlaceholderPage({
     super.key,
     required this.title,
+    this.showFAB = true,
   });
 
   @override
@@ -229,51 +262,100 @@ class PlaceholderPage extends StatelessWidget {
         title: Text(title),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.onPrimary,
+        actions: [
+          IconButton(
+            onPressed: () {
+              // TODO: Search
+            },
+            icon: const Icon(Icons.search),
+          ),
+          IconButton(
+            onPressed: () {
+              // TODO: Filter
+            },
+            icon: const Icon(Icons.filter_list),
+          ),
+        ],
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              Icons.construction,
-              size: 64,
-              color: AppColors.onBackground.withOpacity(0.3),
+              Icons.inbox_outlined,
+              size: 120,
+              color: Colors.grey.shade300,
             ),
             const SizedBox(height: 24),
             Text(
-              'Coming Soon',
+              'No Documents Yet',
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: AppColors.onBackground,
+                color: Colors.grey.shade600,
               ),
             ),
             const SizedBox(height: 12),
             Text(
-              'This feature is under development',
+              'Create your first document to get started',
               style: TextStyle(
-                fontSize: 14,
-                color: AppColors.onBackground.withOpacity(0.6),
+                fontSize: 16,
+                color: Colors.grey.shade500,
               ),
             ),
-            const SizedBox(height: 32),
-            ElevatedButton.icon(
-              onPressed: () => Navigator.pop(context),
-              icon: const Icon(Icons.arrow_back),
-              label: const Text('Go Back'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: AppColors.onPrimary,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 12,
-                ),
+            const SizedBox(height: 24),
+            Container(
+              padding: const EdgeInsets.all(16),
+              margin: const EdgeInsets.symmetric(horizontal: 32),
+              decoration: BoxDecoration(
+                color: Colors.blue.shade50,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.blue.shade200),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.info_outline, color: Colors.blue.shade700),
+                  const SizedBox(width: 12),
+                  Flexible(
+                    child: Text(
+                      'This feature is under development',
+                      style: TextStyle(
+                        color: Colors.blue.shade700,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
         ),
       ),
+      floatingActionButton: showFAB
+          ? FloatingActionButton.extended(
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('This feature is coming soon!'),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              },
+              backgroundColor: AppColors.primary,
+              icon: const Icon(Icons.add),
+              label: Text('Create ${_extractDocType(title)}'),
+            )
+          : null,
     );
+  }
+
+  String _extractDocType(String title) {
+    // Extract singular form from title
+    if (title.endsWith('s')) {
+      return title.substring(0, title.length - 1);
+    }
+    return title;
   }
 }
 

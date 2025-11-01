@@ -2,19 +2,25 @@ import 'package:equatable/equatable.dart';
 import 'invoice_item_entity.dart';
 
 enum InvoiceType {
-  invoice,
-  bill,
-  quotation,
-  deliveryChalan,
-  creditNote,
-  purchaseOrder,
-  proFormaInvoice,
+  invoice,           // Sales Invoice
+  bill,              // Purchase Bill
+  quotation,         // Quotation
+  salesOrder,        // Sales Order
+  deliveryChalan,    // Delivery Challan
+  creditNote,        // Credit Note
+  debitNote,         // Debit Note
+  purchaseOrder,     // Purchase Order
+  expense,           // Expenses
+  indirectIncome,    // Indirect Income
+  proFormaInvoice,   // Pro Forma Invoice
 }
 
 enum PaymentStatus {
   paid,
   unpaid,
+  pending,
   partial,
+  cancelled,
 }
 
 class InvoiceEntity extends Equatable {
