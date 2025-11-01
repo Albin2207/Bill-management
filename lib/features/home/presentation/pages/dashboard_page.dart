@@ -3,8 +3,8 @@ import 'package:provider/provider.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../../core/navigation/app_router.dart';
-import '../widgets/stat_card.dart';
 import '../widgets/quick_action_card.dart';
+import '../widgets/document_type_card.dart';
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
@@ -13,7 +13,7 @@ class DashboardPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('GST Billing'),
+        title: const Text('Home'),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.onPrimary,
         actions: [
@@ -21,28 +21,8 @@ class DashboardPage extends StatelessWidget {
             icon: const Icon(Icons.notifications_outlined),
             onPressed: () {},
           ),
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              if (value == 'logout') {
-                _handleLogout(context);
-              }
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'logout',
-                child: Row(
-                  children: [
-                    Icon(Icons.logout, size: 20),
-                    SizedBox(width: 8),
-                    Text('Logout'),
-                  ],
-                ),
-              ),
-            ],
-          ),
         ],
       ),
-      drawer: _buildDrawer(context),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -64,7 +44,9 @@ class DashboardPage extends StatelessWidget {
                         radius: 30,
                         backgroundColor: AppColors.onPrimary,
                         child: Text(
-                          user?.displayName?.substring(0, 1).toUpperCase() ?? 'U',
+                          (user?.displayName != null && user!.displayName!.isNotEmpty)
+                              ? user.displayName!.substring(0, 1).toUpperCase()
+                              : 'U',
                           style: TextStyle(
                             color: AppColors.primary,
                             fontSize: 24,
@@ -103,47 +85,43 @@ class DashboardPage extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             
-            // Statistics Section
+            // Today's Summary
             Text(
-              'Overview',
+              "Today's Summary",
               style: TextStyle(
-                fontSize: 20,
+                fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: AppColors.onBackground,
               ),
             ),
-            const SizedBox(height: 16),
-            GridView.count(
-              crossAxisCount: 2,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-              childAspectRatio: 1.5,
+            const SizedBox(height: 12),
+            Row(
               children: [
-                StatCard(
-                  title: 'Total Sales',
-                  value: '₹0',
-                  icon: Icons.trending_up,
-                  color: Colors.green,
+                Expanded(
+                  child: _buildTodayStatCard(
+                    'Sales',
+                    '₹0',
+                    Icons.trending_up,
+                    Colors.green,
+                  ),
                 ),
-                StatCard(
-                  title: 'Total Purchase',
-                  value: '₹0',
-                  icon: Icons.trending_down,
-                  color: Colors.blue,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildTodayStatCard(
+                    'Invoices',
+                    '0',
+                    Icons.receipt_long,
+                    AppColors.primary,
+                  ),
                 ),
-                StatCard(
-                  title: 'Pending Invoices',
-                  value: '0',
-                  icon: Icons.pending,
-                  color: Colors.orange,
-                ),
-                StatCard(
-                  title: 'GST Liability',
-                  value: '₹0',
-                  icon: Icons.account_balance,
-                  color: Colors.red,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildTodayStatCard(
+                    'Revenue',
+                    '₹0',
+                    Icons.account_balance_wallet,
+                    Colors.blue,
+                  ),
                 ),
               ],
             ),
@@ -153,50 +131,203 @@ class DashboardPage extends StatelessWidget {
             Text(
               'Quick Actions',
               style: TextStyle(
-                fontSize: 20,
+                fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: AppColors.onBackground,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildQuickButton(
+                    context,
+                    'New Bill',
+                    Icons.add,
+                    AppColors.primary,
+                    () {
+                      Navigator.pushNamed(context, AppRouter.createBill);
+                    },
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildQuickButton(
+                    context,
+                    'Add Product',
+                    Icons.inventory_2,
+                    Colors.green,
+                    () {
+                      Navigator.pushNamed(context, AppRouter.addProduct);
+                    },
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildQuickButton(
+                    context,
+                    'Add Party',
+                    Icons.person_add,
+                    Colors.orange,
+                    () {
+                      Navigator.pushNamed(context, AppRouter.addParty);
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            
+            // Create Documents Section
+            Text(
+              'Create',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppColors.onBackground,
+              ),
+            ),
+            const SizedBox(height: 12),
+            GridView.count(
+              crossAxisCount: 3,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              childAspectRatio: 0.95,
+              children: [
+                DocumentTypeCard(
+                  title: 'Invoice',
+                  icon: Icons.receipt_long,
+                  color: Colors.blue,
+                  onTap: () {
+                    Navigator.pushNamed(context, AppRouter.createInvoice);
+                  },
+                ),
+                DocumentTypeCard(
+                  title: 'Purchase',
+                  icon: Icons.shopping_cart,
+                  color: Colors.orange,
+                  onTap: () {
+                    Navigator.pushNamed(context, AppRouter.createPurchase);
+                  },
+                ),
+                DocumentTypeCard(
+                  title: 'Quotation',
+                  icon: Icons.description,
+                  color: Colors.purple,
+                  onTap: () {
+                    Navigator.pushNamed(context, AppRouter.createQuotation);
+                  },
+                ),
+                DocumentTypeCard(
+                  title: 'Sales Order',
+                  icon: Icons.point_of_sale,
+                  color: Colors.cyan,
+                  onTap: () {
+                    Navigator.pushNamed(context, AppRouter.createSalesOrder);
+                  },
+                ),
+                DocumentTypeCard(
+                  title: 'Delivery Challan',
+                  icon: Icons.local_shipping,
+                  color: Colors.teal,
+                  onTap: () {
+                    Navigator.pushNamed(context, AppRouter.createDeliveryChallan);
+                  },
+                ),
+                DocumentTypeCard(
+                  title: 'Credit Note',
+                  icon: Icons.credit_card,
+                  color: Colors.green,
+                  onTap: () {
+                    Navigator.pushNamed(context, AppRouter.createCreditNote);
+                  },
+                ),
+                DocumentTypeCard(
+                  title: 'Debit Note',
+                  icon: Icons.card_giftcard,
+                  color: Colors.pink,
+                  onTap: () {
+                    Navigator.pushNamed(context, AppRouter.createDebitNote);
+                  },
+                ),
+                DocumentTypeCard(
+                  title: 'Purchase Order',
+                  icon: Icons.shopping_bag,
+                  color: Colors.deepOrange,
+                  onTap: () {
+                    Navigator.pushNamed(context, AppRouter.createPurchaseOrder);
+                  },
+                ),
+                DocumentTypeCard(
+                  title: 'Expenses',
+                  icon: Icons.account_balance_wallet,
+                  color: Colors.red,
+                  onTap: () {
+                    Navigator.pushNamed(context, AppRouter.createExpense);
+                  },
+                ),
+                DocumentTypeCard(
+                  title: 'Indirect Income',
+                  icon: Icons.attach_money,
+                  color: Colors.lightGreen,
+                  onTap: () {
+                    Navigator.pushNamed(context, AppRouter.createIndirectIncome);
+                  },
+                ),
+                DocumentTypeCard(
+                  title: 'Pro Forma',
+                  icon: Icons.insert_drive_file,
+                  color: Colors.indigo,
+                  onTap: () {
+                    Navigator.pushNamed(context, AppRouter.createProForma);
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            
+            // Quick Access Section
+            Text(
+              'Quick Access',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppColors.onBackground,
+              ),
+            ),
+            const SizedBox(height: 12),
             GridView.count(
               crossAxisCount: 2,
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
-              childAspectRatio: 1.3,
+              childAspectRatio: 1.8,
               children: [
                 QuickActionCard(
-                  title: 'Create Invoice',
-                  icon: Icons.receipt_long,
-                  color: AppColors.primary,
-                  onTap: () {
-                    Navigator.pushNamed(context, AppRouter.createInvoice);
-                  },
-                ),
-                QuickActionCard(
-                  title: 'Create Bill',
-                  icon: Icons.receipt,
+                  title: 'E-Way Bill',
+                  icon: Icons.description,
                   color: Colors.blue,
                   onTap: () {
-                    Navigator.pushNamed(context, AppRouter.createBill);
+                    Navigator.pushNamed(context, AppRouter.eWayBill);
                   },
                 ),
                 QuickActionCard(
-                  title: 'Parties',
-                  icon: Icons.people,
+                  title: 'E-Invoice',
+                  icon: Icons.receipt_long,
                   color: Colors.green,
                   onTap: () {
-                    Navigator.pushNamed(context, AppRouter.parties);
+                    Navigator.pushNamed(context, AppRouter.eInvoice);
                   },
                 ),
                 QuickActionCard(
-                  title: 'Products',
-                  icon: Icons.inventory_2,
+                  title: 'Payments Timeline',
+                  icon: Icons.payment,
                   color: Colors.orange,
                   onTap: () {
-                    Navigator.pushNamed(context, AppRouter.products);
+                    Navigator.pushNamed(context, AppRouter.paymentsTimeline);
                   },
                 ),
                 QuickActionCard(
@@ -208,27 +339,35 @@ class DashboardPage extends StatelessWidget {
                   },
                 ),
                 QuickActionCard(
-                  title: 'GST Returns',
-                  icon: Icons.description,
-                  color: Colors.red,
+                  title: 'Insights',
+                  icon: Icons.insights,
+                  color: Colors.teal,
                   onTap: () {
-                    Navigator.pushNamed(context, AppRouter.gstReturns);
+                    Navigator.pushNamed(context, AppRouter.insights);
+                  },
+                ),
+                QuickActionCard(
+                  title: 'Invoice Templates',
+                  icon: Icons.insert_drive_file,
+                  color: Colors.indigo,
+                  onTap: () {
+                    Navigator.pushNamed(context, AppRouter.invoiceTemplates);
                   },
                 ),
               ],
             ),
             const SizedBox(height: 24),
             
-            // Recent Transactions
+            // Analytics Summary
             Text(
-              'Recent Invoices',
+              'Analytics Summary',
               style: TextStyle(
-                fontSize: 20,
+                fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: AppColors.onBackground,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -240,156 +379,241 @@ class DashboardPage extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  _buildEmptyState(
-                    icon: Icons.receipt_long,
-                    message: 'No invoices yet',
-                    subtitle: 'Create your first invoice to get started',
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _buildAnalyticsItem('Total Revenue', '₹0', Icons.trending_up),
+                      _buildAnalyticsItem('GST Collected', '₹0', Icons.account_balance),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    height: 100,
+                    decoration: BoxDecoration(
+                      color: AppColors.background,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Center(
+                      child: Text(
+                        'Chart will be displayed here',
+                        style: TextStyle(
+                          color: AppColors.onBackground.withOpacity(0.5),
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
             ),
+            const SizedBox(height: 24),
+            
+            // Pending Payments Widget
+            Text(
+              'Pending Payments',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppColors.onBackground,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: AppColors.onBackground.withOpacity(0.1),
+                ),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Receivable',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.onBackground,
+                        ),
+                      ),
+                      Text(
+                        '₹0',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Payable',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.onBackground,
+                        ),
+                      ),
+                      Text(
+                        '₹0',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+            
+            // Recent Bills List
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Recent Bills',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.onBackground,
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, AppRouter.bills);
+                  },
+                  child: const Text('View All'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: AppColors.onBackground.withOpacity(0.1),
+                ),
+              ),
+              child: _buildEmptyState(
+                icon: Icons.receipt,
+                message: 'No bills yet',
+                subtitle: 'Create your first bill to get started',
+              ),
+            ),
+            const SizedBox(height: 24),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.pushNamed(context, AppRouter.createInvoice);
-        },
-        backgroundColor: AppColors.primary,
-        icon: const Icon(Icons.add),
-        label: const Text('New Invoice'),
       ),
     );
   }
 
-  Widget _buildDrawer(BuildContext context) {
-    return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
+  Widget _buildTodayStatCard(String title, String value, IconData icon, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: AppColors.onBackground.withOpacity(0.1),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          DrawerHeader(
-            decoration: BoxDecoration(
-              color: AppColors.primary,
-            ),
-            child: Consumer<AuthProvider>(
-              builder: (context, authProvider, child) {
-                final user = authProvider.user;
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    CircleAvatar(
-                      radius: 30,
-                      backgroundColor: AppColors.onPrimary,
-                      child: Text(
-                        user?.displayName?.substring(0, 1).toUpperCase() ?? 'U',
-                        style: TextStyle(
-                          color: AppColors.primary,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      user?.displayName ?? 'User',
-                      style: TextStyle(
-                        color: AppColors.onPrimary,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    if (user?.email != null)
-                      Text(
-                        user!.email!,
-                        style: TextStyle(
-                          color: AppColors.onPrimary.withOpacity(0.8),
-                          fontSize: 14,
-                        ),
-                      ),
-                  ],
-                );
-              },
+          Icon(icon, color: color, size: 24),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: AppColors.onBackground,
             ),
           ),
-          _buildDrawerItem(
-            context,
-            icon: Icons.dashboard,
-            title: 'Dashboard',
-            route: AppRouter.home,
-          ),
-          _buildDrawerItem(
-            context,
-            icon: Icons.receipt_long,
-            title: 'Invoices',
-            route: AppRouter.invoices,
-          ),
-          _buildDrawerItem(
-            context,
-            icon: Icons.receipt,
-            title: 'Bills',
-            route: AppRouter.bills,
-          ),
-          _buildDrawerItem(
-            context,
-            icon: Icons.people,
-            title: 'Parties',
-            route: AppRouter.parties,
-          ),
-          _buildDrawerItem(
-            context,
-            icon: Icons.inventory_2,
-            title: 'Products',
-            route: AppRouter.products,
-          ),
-          _buildDrawerItem(
-            context,
-            icon: Icons.account_balance_wallet,
-            title: 'Ledger',
-            route: AppRouter.ledger,
-          ),
-          _buildDrawerItem(
-            context,
-            icon: Icons.assessment,
-            title: 'Reports',
-            route: AppRouter.reports,
-          ),
-          _buildDrawerItem(
-            context,
-            icon: Icons.description,
-            title: 'GST Returns',
-            route: AppRouter.gstReturns,
-          ),
-          const Divider(),
-          _buildDrawerItem(
-            context,
-            icon: Icons.settings,
-            title: 'Settings',
-            route: AppRouter.settings,
-          ),
-          ListTile(
-            leading: const Icon(Icons.logout),
-            title: const Text('Logout'),
-            onTap: () => _handleLogout(context),
+          const SizedBox(height: 4),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 12,
+              color: AppColors.onBackground.withOpacity(0.6),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildDrawerItem(
-    BuildContext context, {
-    required IconData icon,
-    required String title,
-    required String route,
-  }) {
-    return ListTile(
-      leading: Icon(icon),
-      title: Text(title),
-      onTap: () {
-        Navigator.pop(context);
-        Navigator.pushReplacementNamed(context, route);
-      },
+  Widget _buildQuickButton(
+    BuildContext context,
+    String label,
+    IconData icon,
+    Color color,
+    VoidCallback onTap,
+  ) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: color.withOpacity(0.3),
+          ),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: color, size: 28),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: AppColors.onBackground,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAnalyticsItem(String label, String value, IconData icon) {
+    return Column(
+      children: [
+        Icon(icon, color: AppColors.primary, size: 32),
+        const SizedBox(height: 8),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: AppColors.onBackground,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: AppColors.onBackground.withOpacity(0.6),
+          ),
+        ),
+      ],
     );
   }
 
@@ -404,20 +628,20 @@ class DashboardPage extends StatelessWidget {
         children: [
           Icon(
             icon,
-            size: 64,
+            size: 48,
             color: AppColors.onBackground.withOpacity(0.3),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           Text(
             message,
             style: TextStyle(
-              fontSize: 18,
+              fontSize: 16,
               fontWeight: FontWeight.w500,
               color: AppColors.onBackground.withOpacity(0.7),
             ),
           ),
           if (subtitle != null) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: 4),
             Text(
               subtitle,
               style: TextStyle(
@@ -431,13 +655,4 @@ class DashboardPage extends StatelessWidget {
       ),
     );
   }
-
-  void _handleLogout(BuildContext context) async {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    await authProvider.signOut();
-    if (context.mounted) {
-      Navigator.of(context).pushReplacementNamed(AppRouter.login);
-    }
-  }
 }
-

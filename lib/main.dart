@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'firebase_options.dart';
@@ -7,6 +6,8 @@ import 'core/di/service_locator.dart' as di;
 import 'core/navigation/app_router.dart';
 import 'core/constants/app_colors.dart';
 import 'features/auth/presentation/providers/auth_provider.dart';
+import 'features/party/presentation/providers/party_provider.dart';
+import 'features/product/presentation/providers/product_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -67,6 +68,12 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(
           create: (_) => di.sl<AuthProvider>(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => di.sl<PartyProvider>(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => di.sl<ProductProvider>(),
         ),
       ],
       child: MaterialApp(

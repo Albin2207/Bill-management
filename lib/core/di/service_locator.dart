@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import '../../core/services/cloudinary_service.dart';
 import '../../features/auth/data/datasources/auth_remote_datasource.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
@@ -10,12 +12,29 @@ import '../../features/auth/domain/usecases/sign_in_with_google_usecase.dart';
 import '../../features/auth/domain/usecases/get_current_user_usecase.dart';
 import '../../features/auth/domain/usecases/sign_out_usecase.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart' as auth_provider;
+import '../../features/party/data/datasources/party_remote_datasource.dart';
+import '../../features/party/data/repositories/party_repository_impl.dart';
+import '../../features/party/domain/repositories/party_repository.dart';
+import '../../features/party/domain/usecases/add_party_usecase.dart';
+import '../../features/party/domain/usecases/get_all_parties_usecase.dart';
+import '../../features/party/domain/usecases/update_party_usecase.dart';
+import '../../features/party/domain/usecases/delete_party_usecase.dart';
+import '../../features/party/presentation/providers/party_provider.dart';
+import '../../features/product/data/datasources/product_remote_datasource.dart';
+import '../../features/product/data/repositories/product_repository_impl.dart';
+import '../../features/product/domain/repositories/product_repository.dart';
+import '../../features/product/domain/usecases/add_product_usecase.dart';
+import '../../features/product/domain/usecases/get_all_products_usecase.dart';
+import '../../features/product/domain/usecases/update_product_usecase.dart';
+import '../../features/product/domain/usecases/delete_product_usecase.dart';
+import '../../features/product/presentation/providers/product_provider.dart';
 
 final sl = GetIt.instance;
 
 Future<void> init() async {
   // ========== External Dependencies ==========
   sl.registerLazySingleton(() => FirebaseAuth.instance);
+  sl.registerLazySingleton(() => FirebaseFirestore.instance);
   sl.registerLazySingleton(
     () => GoogleSignIn(
       scopes: [
@@ -24,6 +43,9 @@ Future<void> init() async {
       ],
     ),
   );
+  
+  // ========== Services ==========
+  sl.registerLazySingleton(() => CloudinaryService());
 
   // ========== Auth Feature ==========
   // Data Sources
@@ -56,6 +78,60 @@ Future<void> init() async {
       signInWithGoogleUsecase: sl(),
       getCurrentUserUsecase: sl(),
       signOutUsecase: sl(),
+    ),
+  );
+
+  // ========== Party Feature ==========
+  // Data Sources
+  sl.registerLazySingleton<PartyRemoteDataSource>(
+    () => PartyRemoteDataSourceImpl(firestore: sl()),
+  );
+
+  // Repositories
+  sl.registerLazySingleton<PartyRepository>(
+    () => PartyRepositoryImpl(remoteDataSource: sl()),
+  );
+
+  // Use Cases
+  sl.registerLazySingleton(() => AddPartyUsecase(sl()));
+  sl.registerLazySingleton(() => GetAllPartiesUsecase(sl()));
+  sl.registerLazySingleton(() => UpdatePartyUsecase(sl()));
+  sl.registerLazySingleton(() => DeletePartyUsecase(sl()));
+
+  // Providers
+  sl.registerFactory(
+    () => PartyProvider(
+      addPartyUsecase: sl(),
+      getAllPartiesUsecase: sl(),
+      updatePartyUsecase: sl(),
+      deletePartyUsecase: sl(),
+    ),
+  );
+
+  // ========== Product Feature ==========
+  // Data Sources
+  sl.registerLazySingleton<ProductRemoteDataSource>(
+    () => ProductRemoteDataSourceImpl(firestore: sl()),
+  );
+
+  // Repositories
+  sl.registerLazySingleton<ProductRepository>(
+    () => ProductRepositoryImpl(remoteDataSource: sl()),
+  );
+
+  // Use Cases
+  sl.registerLazySingleton(() => AddProductUsecase(sl()));
+  sl.registerLazySingleton(() => GetAllProductsUsecase(sl()));
+  sl.registerLazySingleton(() => UpdateProductUsecase(sl()));
+  sl.registerLazySingleton(() => DeleteProductUsecase(sl()));
+
+  // Providers
+  sl.registerFactory(
+    () => ProductProvider(
+      addProductUsecase: sl(),
+      getAllProductsUsecase: sl(),
+      updateProductUsecase: sl(),
+      deleteProductUsecase: sl(),
     ),
   );
 }
