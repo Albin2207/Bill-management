@@ -35,6 +35,12 @@ import '../../features/invoice/domain/usecases/add_invoice_usecase.dart';
 import '../../features/invoice/domain/usecases/get_all_invoices_usecase.dart';
 import '../../features/invoice/domain/usecases/update_invoice_status_usecase.dart';
 import '../../features/invoice/presentation/providers/invoice_provider.dart';
+import '../../features/settings/data/datasources/document_settings_remote_datasource.dart';
+import '../../features/settings/data/repositories/document_settings_repository_impl.dart';
+import '../../features/settings/domain/repositories/document_settings_repository.dart';
+import '../../features/settings/domain/usecases/get_document_settings_usecase.dart';
+import '../../features/settings/domain/usecases/save_document_settings_usecase.dart';
+import '../../features/settings/presentation/providers/document_settings_provider.dart';
 
 final sl = GetIt.instance;
 
@@ -164,6 +170,29 @@ Future<void> init() async {
       addInvoiceUsecase: sl(),
       getAllInvoicesUsecase: sl(),
       updateInvoiceStatusUsecase: sl(),
+    ),
+  );
+
+  // ========== Document Settings Feature ==========
+  // Data Sources
+  sl.registerLazySingleton<DocumentSettingsRemoteDataSource>(
+    () => DocumentSettingsRemoteDataSourceImpl(firestore: sl()),
+  );
+
+  // Repositories
+  sl.registerLazySingleton<DocumentSettingsRepository>(
+    () => DocumentSettingsRepositoryImpl(remoteDataSource: sl()),
+  );
+
+  // Use Cases
+  sl.registerLazySingleton(() => GetDocumentSettingsUsecase(sl()));
+  sl.registerLazySingleton(() => SaveDocumentSettingsUsecase(sl()));
+
+  // Providers
+  sl.registerFactory(
+    () => DocumentSettingsProvider(
+      getDocumentSettingsUsecase: sl(),
+      saveDocumentSettingsUsecase: sl(),
     ),
   );
 }

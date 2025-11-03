@@ -55,19 +55,27 @@ class InvoiceNumberService {
   static String _getPrefix(InvoiceType type) {
     switch (type) {
       case InvoiceType.invoice:
-        return AppConstants.invoicePrefix;
+        return 'INV';
       case InvoiceType.bill:
-        return AppConstants.billPrefix;
+        return 'BILL';
       case InvoiceType.quotation:
-        return AppConstants.quotationPrefix;
+        return 'QT';
+      case InvoiceType.salesOrder:
+        return 'SO';
       case InvoiceType.deliveryChalan:
-        return AppConstants.deliveryChalanPrefix;
+        return 'DC';
       case InvoiceType.creditNote:
-        return AppConstants.creditNotePrefix;
+        return 'CN';
+      case InvoiceType.debitNote:
+        return 'DN';
       case InvoiceType.purchaseOrder:
-        return AppConstants.purchaseOrderPrefix;
+        return 'PO';
+      case InvoiceType.expense:
+        return 'EXP';
+      case InvoiceType.indirectIncome:
+        return 'INC';
       case InvoiceType.proFormaInvoice:
-        return AppConstants.proFormaPrefix;
+        return 'PF';
     }
   }
 }

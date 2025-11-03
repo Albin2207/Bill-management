@@ -9,6 +9,7 @@ import 'features/auth/presentation/providers/auth_provider.dart';
 import 'features/party/presentation/providers/party_provider.dart';
 import 'features/product/presentation/providers/product_provider.dart';
 import 'features/invoice/presentation/providers/invoice_provider.dart';
+import 'features/settings/presentation/providers/document_settings_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -78,6 +79,9 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (_) => di.sl<InvoiceProvider>(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => di.sl<DocumentSettingsProvider>(),
         ),
       ],
       child: MaterialApp(

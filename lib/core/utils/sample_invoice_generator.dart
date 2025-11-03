@@ -1,0 +1,88 @@
+import '../../features/invoice/domain/entities/invoice_entity.dart';
+import '../../features/invoice/domain/entities/invoice_item_entity.dart';
+
+class SampleInvoiceGenerator {
+  static InvoiceEntity generateSampleInvoice() {
+    final now = DateTime.now();
+    
+    return InvoiceEntity(
+      id: 'SAMPLE_${now.millisecondsSinceEpoch}',
+      invoiceNumber: 'INV-2024-001',
+      invoiceType: InvoiceType.invoice,
+      invoiceDate: now,
+      dueDate: now.add(const Duration(days: 30)),
+      partyId: 'sample_party',
+      partyName: 'Sample Customer Pvt Ltd',
+      partyGstin: '29AABCT1234C1Z5',
+      partyAddress: '123, MG Road, Indiranagar',
+      partyCity: 'Bangalore',
+      partyState: 'Karnataka',
+      partyPhone: '+91 9876543210',
+      items: [
+        const InvoiceItemEntity(
+          productId: 'prod1',
+          productName: 'Premium Laptop',
+          hsnCode: '8471',
+          quantity: 2,
+          unit: 'piece',
+          rate: 45000,
+          discount: 2000,
+          gstRate: 18,
+          cgst: 7740,
+          sgst: 7740,
+          igst: null,
+          taxableAmount: 86000,
+          totalAmount: 101480,
+        ),
+        const InvoiceItemEntity(
+          productId: 'prod2',
+          productName: 'Wireless Mouse',
+          hsnCode: '8471',
+          quantity: 5,
+          unit: 'piece',
+          rate: 800,
+          discount: 0,
+          gstRate: 18,
+          cgst: 360,
+          sgst: 360,
+          igst: null,
+          taxableAmount: 4000,
+          totalAmount: 4720,
+        ),
+        const InvoiceItemEntity(
+          productId: 'prod3',
+          productName: 'USB Cable',
+          hsnCode: '8544',
+          quantity: 10,
+          unit: 'piece',
+          rate: 150,
+          discount: 50,
+          gstRate: 12,
+          cgst: 90,
+          sgst: 90,
+          igst: null,
+          taxableAmount: 1500,
+          totalAmount: 1680,
+        ),
+      ],
+      subtotal: 93500,
+      totalDiscount: 2050,
+      taxableAmount: 91450,
+      cgst: 8190,
+      sgst: 8190,
+      igst: 0,
+      totalTax: 16380,
+      grandTotal: 107880,
+      paymentStatus: PaymentStatus.pending,
+      paidAmount: 0,
+      balanceAmount: 107880,
+      notes: 'This is a sample invoice generated for preview purposes. Thank you for your business!',
+      termsAndConditions: '1. Payment due within 30 days\n2. Late payment charges applicable\n3. Goods once sold will not be taken back',
+      isInterState: false,
+      userId: 'sample_user',
+      createdAt: now,
+      updatedAt: now,
+    );
+  }
+}
+

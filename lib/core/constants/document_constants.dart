@@ -18,23 +18,71 @@ class DocumentConstants {
   ];
 
   // Document Prefixes
-  static const List<String> invoicePrefixes = [
+  static const List<String> invoicePrefixOptions = [
     'INV',
     'BILL',
     'SI',
     'TAX-INV',
   ];
 
-  static const List<String> purchasePrefixes = [
+  static const List<String> purchaseBillPrefixes = [
     'PUR',
+    'PURCHASE',
+    'PUR-BILL',
+  ];
+
+  static const List<String> purchaseOrderPrefixes = [
     'PO',
-    'BILL',
+    'PORD',
+    'PUR-ORD',
+  ];
+
+  static const List<String> debitNotePrefixes = [
+    'DN',
+    'DEBIT',
+    'DR-NOTE',
   ];
 
   static const List<String> quotationPrefixes = [
     'QT',
     'QUOT',
-    'EST',
+    'QUOTE',
+  ];
+
+  static const List<String> deliveryChallanPrefixes = [
+    'DC',
+    'CHALLAN',
+    'DEL-CH',
+  ];
+
+  static const List<String> expensePrefixes = [
+    'EXP',
+    'EXPENSE',
+    'EXPN',
+  ];
+
+  static const List<String> indirectIncomePrefixes = [
+    'INC',
+    'INCOME',
+    'OTHER-INC',
+  ];
+
+  static const List<String> salesOrderPrefixes = [
+    'SO',
+    'SORD',
+    'SAL-ORD',
+  ];
+
+  static const List<String> creditNotePrefixes = [
+    'CN',
+    'CREDIT',
+    'CR-NOTE',
+  ];
+
+  static const List<String> proFormaPrefixes = [
+    'PFI',
+    'PROFORMA',
+    'PI',
   ];
 
   // Currencies (Major ones)

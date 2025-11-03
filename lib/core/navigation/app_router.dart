@@ -8,6 +8,26 @@ import '../../features/home/presentation/pages/dashboard_page.dart';
 import '../../features/bill/presentation/pages/bills_page.dart';
 import '../../features/invoice/presentation/pages/create_invoice_page.dart';
 import '../../features/invoice/presentation/pages/invoices_list_page.dart';
+import '../../features/invoice/presentation/pages/sales_orders_list_page.dart';
+import '../../features/invoice/presentation/pages/create_sales_order_page.dart';
+import '../../features/invoice/presentation/pages/credit_notes_list_page.dart';
+import '../../features/invoice/presentation/pages/create_credit_note_page.dart';
+import '../../features/invoice/presentation/pages/pro_forma_list_page.dart';
+import '../../features/invoice/presentation/pages/create_pro_forma_page.dart';
+import '../../features/invoice/presentation/pages/purchases_list_page.dart';
+import '../../features/invoice/presentation/pages/create_purchase_page.dart';
+import '../../features/invoice/presentation/pages/purchase_orders_list_page.dart';
+import '../../features/invoice/presentation/pages/create_purchase_order_page.dart';
+import '../../features/invoice/presentation/pages/debit_notes_list_page.dart';
+import '../../features/invoice/presentation/pages/create_debit_note_page.dart';
+import '../../features/invoice/presentation/pages/quotations_list_page.dart';
+import '../../features/invoice/presentation/pages/create_quotation_page.dart';
+import '../../features/invoice/presentation/pages/delivery_challans_list_page.dart';
+import '../../features/invoice/presentation/pages/create_delivery_challan_page.dart';
+import '../../features/invoice/presentation/pages/expenses_list_page.dart';
+import '../../features/invoice/presentation/pages/create_expense_page.dart';
+import '../../features/invoice/presentation/pages/indirect_income_list_page.dart';
+import '../../features/invoice/presentation/pages/create_indirect_income_page.dart';
 import '../../features/bill/presentation/pages/create_bill_page.dart';
 import '../../features/bill/presentation/pages/bills_list_page.dart';
 import '../../features/party/presentation/pages/parties_list_page.dart';
@@ -19,6 +39,7 @@ import '../../features/home/presentation/pages/insights_page.dart';
 import '../../features/gst_return/presentation/pages/gst_returns_page.dart';
 import '../../features/ledger/presentation/pages/ledger_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
+import '../../features/settings/presentation/pages/document_settings_page.dart';
 
 class AppRouter {
   // Auth Routes
@@ -148,49 +169,49 @@ class AppRouter {
       // Sales Documents (List Pages)
       case createSalesOrder:
         return MaterialPageRoute(
-          builder: (_) => const PlaceholderPage(title: 'Sales Orders'),
+          builder: (_) => const SalesOrdersListPage(),
         );
       case createCreditNote:
         return MaterialPageRoute(
-          builder: (_) => const PlaceholderPage(title: 'Credit Notes'),
+          builder: (_) => const CreditNotesListPage(),
         );
       case createProForma:
         return MaterialPageRoute(
-          builder: (_) => const PlaceholderPage(title: 'Pro Forma Invoices'),
+          builder: (_) => const ProFormaListPage(),
         );
       
       // Purchase Documents (List Pages)
       case createPurchase:
         return MaterialPageRoute(
-          builder: (_) => const PlaceholderPage(title: 'Purchases'),
+          builder: (_) => const PurchasesListPage(),
         );
       case createPurchaseOrder:
         return MaterialPageRoute(
-          builder: (_) => const PlaceholderPage(title: 'Purchase Orders'),
+          builder: (_) => const PurchaseOrdersListPage(),
         );
       case createDebitNote:
         return MaterialPageRoute(
-          builder: (_) => const PlaceholderPage(title: 'Debit Notes'),
+          builder: (_) => const DebitNotesListPage(),
         );
       
       // Quotation (List Page)
       case createQuotation:
         return MaterialPageRoute(
-          builder: (_) => const PlaceholderPage(title: 'Quotations'),
+          builder: (_) => const QuotationsListPage(),
         );
       
       // Other Documents (List Pages)
       case createDeliveryChallan:
         return MaterialPageRoute(
-          builder: (_) => const PlaceholderPage(title: 'Delivery Challans'),
+          builder: (_) => const DeliveryChallansListPage(),
         );
       case createExpense:
         return MaterialPageRoute(
-          builder: (_) => const PlaceholderPage(title: 'Expenses'),
+          builder: (_) => const ExpensesListPage(),
         );
       case createIndirectIncome:
         return MaterialPageRoute(
-          builder: (_) => const PlaceholderPage(title: 'Indirect Income'),
+          builder: (_) => const IndirectIncomeListPage(),
         );
       
       // Quick Access
@@ -198,10 +219,11 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const InsightsPage());
       case businessProfile:
       case eWayBill:
+      case documentSettings:
+        return MaterialPageRoute(builder: (_) => const DocumentSettingsPage());
       case eInvoice:
       case paymentsTimeline:
       case invoiceTemplates:
-      case documentSettings:
       case backupRestore:
         return MaterialPageRoute(
           builder: (_) => PlaceholderPage(

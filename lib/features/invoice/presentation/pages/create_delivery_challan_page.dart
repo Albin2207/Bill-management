@@ -17,20 +17,20 @@ import '../providers/invoice_provider.dart';
 import '../../domain/entities/invoice_entity.dart';
 import '../../domain/entities/invoice_item_entity.dart';
 
-class CreateInvoicePage extends StatefulWidget {
-  const CreateInvoicePage({super.key});
+class CreateDeliveryChallanPage extends StatefulWidget {
+  const CreateDeliveryChallanPage({super.key});
 
   @override
-  State<CreateInvoicePage> createState() => _CreateInvoicePageState();
+  State<CreateDeliveryChallanPage> createState() => _CreateDeliveryChallanPageState();
 }
 
-class _CreateInvoicePageState extends State<CreateInvoicePage> {
+class _CreateDeliveryChallanPageState extends State<CreateDeliveryChallanPage> {
   // Document Details
-  String _prefix = DocumentConstants.invoicePrefixOptions.first;
+  String _prefix = DocumentConstants.deliveryChallanPrefixes.first;
   String _documentNumber = '';
   DateTime _documentDate = DateTime.now();
   DateTime? _dueDate;
-  String _documentTitle = 'Tax Invoice';
+  String _documentTitle = 'Delivery Challan';
   double _discount = 0;
   String _discountType = DocumentConstants.discountTypes.first;
   
@@ -87,7 +87,7 @@ class _CreateInvoicePageState extends State<CreateInvoicePage> {
         documentTitle: _documentTitle,
         discount: _discount,
         discountType: _discountType,
-        prefixOptions: DocumentConstants.invoicePrefixOptions,
+        prefixOptions: DocumentConstants.deliveryChallanPrefixes,
         showDueDate: true,
         onSave: (data) {
           setState(() {
@@ -130,7 +130,7 @@ class _CreateInvoicePageState extends State<CreateInvoicePage> {
     return _calculateSubtotal() - _calculateTotalDiscount() + _calculateTotalTax() + _calculateAdditionalCharges();
   }
 
-  Future<void> _saveInvoice() async {
+  Future<void> _saveDeliveryChallan() async {
     if (_selectedCustomer == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please select a customer')),
@@ -189,10 +189,10 @@ class _CreateInvoicePageState extends State<CreateInvoicePage> {
     final isInterState = _selectedCustomer!.state != null && 
                          _selectedCustomer!.state != 'Your State'; // TODO: Get business state
 
-    final invoice = InvoiceEntity(
+    final deliveryChallan = InvoiceEntity(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       invoiceNumber: '$_prefix-$_documentNumber',
-      invoiceType: InvoiceType.invoice,
+      invoiceType: InvoiceType.deliveryChalan,
       invoiceDate: _documentDate,
       dueDate: _dueDate,
       partyId: _selectedCustomer!.id!,
@@ -222,8 +222,8 @@ class _CreateInvoicePageState extends State<CreateInvoicePage> {
       updatedAt: DateTime.now(),
     );
 
-    // Save invoice
-    final success = await invoiceProvider.addInvoice(invoice);
+    // Save delivery challan
+    final success = await invoiceProvider.addInvoice(deliveryChallan);
 
     if (!mounted) return;
 
@@ -241,7 +241,7 @@ class _CreateInvoicePageState extends State<CreateInvoicePage> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Invoice saved successfully!'),
+          content: Text('Delivery Challan saved successfully!'),
           backgroundColor: Colors.green,
         ),
       );
@@ -249,7 +249,7 @@ class _CreateInvoicePageState extends State<CreateInvoicePage> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(invoiceProvider.errorMessage ?? 'Failed to save invoice'),
+          content: Text(invoiceProvider.errorMessage ?? 'Failed to save delivery challan'),
           backgroundColor: Colors.red,
         ),
       );
@@ -441,7 +441,7 @@ class _CreateInvoicePageState extends State<CreateInvoicePage> {
                         Expanded(
                           flex: 2,
                           child: ElevatedButton.icon(
-                            onPressed: _saveInvoice,
+                            onPressed: _saveDeliveryChallan,
                             icon: const Icon(Icons.check),
                             label: const Text('Save Invoice'),
                             style: ElevatedButton.styleFrom(

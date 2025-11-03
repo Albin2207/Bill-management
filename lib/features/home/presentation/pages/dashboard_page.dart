@@ -300,18 +300,6 @@ class _DashboardPageState extends State<DashboardPage> {
                 Expanded(
                   child: _buildQuickButton(
                     context,
-                    'New Bill',
-                    Icons.add,
-                    AppColors.primary,
-                    () {
-                      Navigator.pushNamed(context, AppRouter.createBill);
-                    },
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _buildQuickButton(
-                    context,
                     'Add Product',
                     Icons.inventory_2,
                     Colors.green,
@@ -505,11 +493,11 @@ class _DashboardPageState extends State<DashboardPage> {
                   },
                 ),
                 QuickActionCard(
-                  title: 'Invoice Templates',
-                  icon: Icons.insert_drive_file,
-                  color: Colors.indigo,
+                  title: 'Document Settings',
+                  icon: Icons.settings_applications,
+                  color: Colors.grey,
                   onTap: () {
-                    Navigator.pushNamed(context, AppRouter.invoiceTemplates);
+                    Navigator.pushNamed(context, AppRouter.documentSettings);
                   },
                 ),
               ],
