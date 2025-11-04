@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/navigation/app_router.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../business/presentation/providers/business_provider.dart';
 
 class MorePage extends StatelessWidget {
   const MorePage({super.key});
@@ -79,7 +80,7 @@ class MorePage extends StatelessWidget {
                 title: 'Business Details',
                 subtitle: 'GSTIN, Address, Contact',
                 onTap: () {
-                  Navigator.pushNamed(context, AppRouter.businessProfile);
+                  Navigator.pushNamed(context, AppRouter.businessDetails);
                 },
               ),
               _buildListTile(
@@ -87,7 +88,9 @@ class MorePage extends StatelessWidget {
                 icon: Icons.image,
                 title: 'Business Logo',
                 subtitle: 'Upload your business logo',
-                onTap: () {},
+                onTap: () {
+                  Navigator.pushNamed(context, AppRouter.businessLogo);
+                },
               ),
               
               const Divider(height: 1),
@@ -266,7 +269,13 @@ class MorePage extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: OutlinedButton.icon(
                   onPressed: () async {
+                    // Clear all provider data before logout
+                    final businessProvider = Provider.of<BusinessProvider>(context, listen: false);
+                    businessProvider.clearBusiness();
+                    
+                    // Sign out
                     await authProvider.signOut();
+                    
                     if (context.mounted) {
                       Navigator.of(context).pushReplacementNamed(AppRouter.login);
                     }

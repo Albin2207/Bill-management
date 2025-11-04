@@ -51,6 +51,13 @@ import '../../features/payment/domain/usecases/get_payments_by_party_usecase.dar
 import '../../features/payment/domain/usecases/delete_payment_usecase.dart';
 import '../../features/payment/presentation/providers/payment_provider.dart';
 import '../../features/accounting/presentation/providers/accounting_provider.dart';
+import '../../features/business/data/datasources/business_remote_datasource.dart';
+import '../../features/business/data/repositories/business_repository_impl.dart';
+import '../../features/business/domain/repositories/business_repository.dart';
+import '../../features/business/domain/usecases/get_business_usecase.dart';
+import '../../features/business/domain/usecases/save_business_usecase.dart';
+import '../../features/business/domain/usecases/update_business_usecase.dart';
+import '../../features/business/presentation/providers/business_provider.dart';
 
 final sl = GetIt.instance;
 
@@ -239,5 +246,30 @@ Future<void> init() async {
   // No data layer needed - uses existing invoice/payment data
   // Provider only
   sl.registerFactory(() => AccountingProvider());
+
+  // ========== Business Feature ==========
+  // Data Sources
+  sl.registerLazySingleton<BusinessRemoteDataSource>(
+    () => BusinessRemoteDataSourceImpl(firestore: sl()),
+  );
+
+  // Repositories
+  sl.registerLazySingleton<BusinessRepository>(
+    () => BusinessRepositoryImpl(remoteDataSource: sl()),
+  );
+
+  // Use Cases
+  sl.registerLazySingleton(() => GetBusinessUsecase(sl()));
+  sl.registerLazySingleton(() => SaveBusinessUsecase(sl()));
+  sl.registerLazySingleton(() => UpdateBusinessUsecase(sl()));
+
+  // Providers
+  sl.registerFactory(
+    () => BusinessProvider(
+      getBusinessUsecase: sl(),
+      saveBusinessUsecase: sl(),
+      updateBusinessUsecase: sl(),
+    ),
+  );
 }
 

@@ -1101,6 +1101,7 @@ class _DocumentSettingsPageState extends State<DocumentSettingsPage> with Single
       final pdfFile = await PDFService.generateInvoicePDF(
         sampleInvoice,
         settings: previewSettings,
+        business: null, // Preview uses settings data only
         isPreview: true, // This saves to temp folder instead of Downloads
       );
 

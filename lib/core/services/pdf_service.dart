@@ -7,6 +7,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:open_file/open_file.dart';
 import '../../features/invoice/domain/entities/invoice_entity.dart';
 import '../../features/settings/domain/entities/document_settings_entity.dart';
+import '../../features/business/domain/entities/business_entity.dart';
 import '../utils/language_helper.dart';
 import 'pdf_templates.dart';
 
@@ -21,6 +22,7 @@ class PDFService {
   static Future<File> generateInvoicePDF(
     InvoiceEntity invoice, {
     DocumentSettingsEntity? settings,
+    BusinessEntity? business,
     bool isPreview = false, // Add preview flag
   }) async {
     final pdf = pw.Document();
@@ -56,7 +58,7 @@ class PDFService {
             
             // Company Details (if enabled and available)
             if (settings?.showCompanyDetails ?? true)
-              _buildCompanyDetails(settings, baseFontSize),
+              _buildCompanyDetails(settings, business, baseFontSize),
             if (settings?.showCompanyDetails ?? true)
               pw.SizedBox(height: 20),
             
@@ -78,7 +80,7 @@ class PDFService {
             
             // Bank Details (if enabled and available)
             if (settings?.showBankDetails ?? true)
-              _buildBankDetails(settings, baseFontSize),
+              _buildBankDetails(settings, business, baseFontSize),
             if (settings?.showBankDetails ?? true)
               pw.SizedBox(height: 20),
             
@@ -91,7 +93,7 @@ class PDFService {
             
             // Signature (if enabled)
             if (settings?.showSignature ?? true)
-              _buildSignature(settings, baseFontSize),
+              _buildSignature(settings, business, baseFontSize),
             
             // Custom Footer (if set)
             if (settings?.customFooter != null && settings!.customFooter!.isNotEmpty) ...[
@@ -201,12 +203,20 @@ class PDFService {
     );
   }
 
-  static pw.Widget _buildCompanyDetails(DocumentSettingsEntity? settings, double baseFontSize) {
-    if (settings == null) return pw.SizedBox();
+  static pw.Widget _buildCompanyDetails(
+    DocumentSettingsEntity? settings,
+    BusinessEntity? business,
+    double baseFontSize,
+  ) {
+    // Use business data as primary source, fall back to settings
+    final companyName = business?.businessName ?? settings?.companyName;
+    final gstin = business?.gstin ?? settings?.companyGSTIN;
+    final address = business?.address ?? settings?.companyAddress;
+    final phone = business?.phone ?? settings?.companyPhone;
+    final email = business?.email ?? settings?.companyEmail;
+    final website = business?.website ?? settings?.companyWebsite;
     
-    final hasDetails = settings.companyName != null || 
-                       settings.companyGSTIN != null || 
-                       settings.companyAddress != null;
+    final hasDetails = companyName != null || gstin != null || address != null;
     
     if (!hasDetails) return pw.SizedBox();
 
@@ -219,9 +229,9 @@ class PDFService {
       child: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
-          if (settings.companyName != null && settings.companyName!.isNotEmpty) ...[
+          if (companyName != null && companyName.isNotEmpty) ...[
             pw.Text(
-              settings.companyName!,
+              companyName,
               style: pw.TextStyle(
                 fontSize: baseFontSize + 4,
                 fontWeight: pw.FontWeight.bold,
@@ -229,23 +239,23 @@ class PDFService {
             ),
             pw.SizedBox(height: 4),
           ],
-          if (settings.companyGSTIN != null && settings.companyGSTIN!.isNotEmpty)
-            pw.Text('GSTIN: ${settings.companyGSTIN}', style: pw.TextStyle(fontSize: baseFontSize)),
-          if (settings.companyAddress != null && settings.companyAddress!.isNotEmpty) ...[
+          if (gstin != null && gstin.isNotEmpty)
+            pw.Text('GSTIN: $gstin', style: pw.TextStyle(fontSize: baseFontSize)),
+          if (address != null && address.isNotEmpty) ...[
             pw.SizedBox(height: 2),
-            pw.Text(settings.companyAddress!, style: pw.TextStyle(fontSize: baseFontSize)),
+            pw.Text(address, style: pw.TextStyle(fontSize: baseFontSize)),
           ],
-          if (settings.companyPhone != null && settings.companyPhone!.isNotEmpty) ...[
+          if (phone != null && phone.isNotEmpty) ...[
             pw.SizedBox(height: 2),
-            pw.Text('Phone: ${settings.companyPhone}', style: pw.TextStyle(fontSize: baseFontSize)),
+            pw.Text('Phone: $phone', style: pw.TextStyle(fontSize: baseFontSize)),
           ],
-          if (settings.companyEmail != null && settings.companyEmail!.isNotEmpty) ...[
+          if (email != null && email.isNotEmpty) ...[
             pw.SizedBox(height: 2),
-            pw.Text('Email: ${settings.companyEmail}', style: pw.TextStyle(fontSize: baseFontSize)),
+            pw.Text('Email: $email', style: pw.TextStyle(fontSize: baseFontSize)),
           ],
-          if (settings.companyWebsite != null && settings.companyWebsite!.isNotEmpty) ...[
+          if (website != null && website.isNotEmpty) ...[
             pw.SizedBox(height: 2),
-            pw.Text('Website: ${settings.companyWebsite}', style: pw.TextStyle(fontSize: baseFontSize)),
+            pw.Text('Website: $website', style: pw.TextStyle(fontSize: baseFontSize)),
           ],
         ],
       ),
@@ -386,13 +396,27 @@ class PDFService {
     );
   }
 
-  static pw.Widget _buildBankDetails(DocumentSettingsEntity? settings, double baseFontSize) {
-    if (settings == null) return pw.SizedBox();
+  static pw.Widget _buildBankDetails(
+    DocumentSettingsEntity? settings,
+    BusinessEntity? business,
+    double baseFontSize,
+  ) {
+    // Use business bank account (primary) as primary source
+    final primaryBank = business?.bankAccounts.isNotEmpty == true
+        ? business!.bankAccounts.firstWhere((b) => b.isPrimary, orElse: () => business.bankAccounts.first)
+        : null;
     
-    final hasDetails = settings.bankName != null || 
-                       settings.accountNumber != null || 
-                       settings.ifscCode != null ||
-                       settings.upiId != null;
+    // Merge business and settings data
+    final bankName = primaryBank?.bankName ?? settings?.bankName;
+    final accountNumber = primaryBank?.accountNumber ?? settings?.accountNumber;
+    final ifscCode = primaryBank?.ifscCode ?? settings?.ifscCode;
+    final branchName = primaryBank?.branchName ?? settings?.branchName;
+    final upiId = business?.upiId ?? settings?.upiId;
+    
+    final hasDetails = bankName != null || 
+                       accountNumber != null || 
+                       ifscCode != null ||
+                       upiId != null;
     
     if (!hasDetails) return pw.SizedBox();
 
@@ -413,23 +437,23 @@ class PDFService {
             ),
           ),
           pw.SizedBox(height: 8),
-          if (settings.bankName != null && settings.bankName!.isNotEmpty)
-            pw.Text('${_t('bank', settings)}: ${settings.bankName}', style: pw.TextStyle(fontSize: baseFontSize)),
-          if (settings.accountNumber != null && settings.accountNumber!.isNotEmpty) ...[
+          if (bankName != null && bankName.isNotEmpty)
+            pw.Text('${_t('bank', settings)}: $bankName', style: pw.TextStyle(fontSize: baseFontSize)),
+          if (accountNumber != null && accountNumber.isNotEmpty) ...[
             pw.SizedBox(height: 2),
-            pw.Text('${_t('accountNumber', settings)}: ${settings.accountNumber}', style: pw.TextStyle(fontSize: baseFontSize)),
+            pw.Text('${_t('accountNumber', settings)}: $accountNumber', style: pw.TextStyle(fontSize: baseFontSize)),
           ],
-          if (settings.ifscCode != null && settings.ifscCode!.isNotEmpty) ...[
+          if (ifscCode != null && ifscCode.isNotEmpty) ...[
             pw.SizedBox(height: 2),
-            pw.Text('${_t('ifscCode', settings)}: ${settings.ifscCode}', style: pw.TextStyle(fontSize: baseFontSize)),
+            pw.Text('${_t('ifscCode', settings)}: $ifscCode', style: pw.TextStyle(fontSize: baseFontSize)),
           ],
-          if (settings.branchName != null && settings.branchName!.isNotEmpty) ...[
+          if (branchName != null && branchName.isNotEmpty) ...[
             pw.SizedBox(height: 2),
-            pw.Text('${_t('branch', settings)}: ${settings.branchName}', style: pw.TextStyle(fontSize: baseFontSize)),
+            pw.Text('${_t('branch', settings)}: $branchName', style: pw.TextStyle(fontSize: baseFontSize)),
           ],
-          if (settings.upiId != null && settings.upiId!.isNotEmpty) ...[
+          if (upiId != null && upiId.isNotEmpty) ...[
             pw.SizedBox(height: 2),
-            pw.Text('${_t('upi', settings)}: ${settings.upiId}', style: pw.TextStyle(fontSize: baseFontSize)),
+            pw.Text('${_t('upi', settings)}: $upiId', style: pw.TextStyle(fontSize: baseFontSize)),
           ],
         ],
       ),
@@ -465,7 +489,16 @@ class PDFService {
     );
   }
 
-  static pw.Widget _buildSignature(DocumentSettingsEntity? settings, double baseFontSize) {
+  static pw.Widget _buildSignature(
+    DocumentSettingsEntity? settings,
+    BusinessEntity? business,
+    double baseFontSize,
+  ) {
+    // Use business signature URL or settings signature URL
+    // TODO: Implement signature image in future enhancement
+    // final signatureUrl = business?.signatureUrl ?? settings?.signatureUrl;
+    final signatory = settings?.authorizedSignatory ?? business?.businessName;
+    
     return pw.Container(
       alignment: pw.Alignment.centerRight,
       child: pw.Column(
@@ -488,7 +521,7 @@ class PDFService {
             ),
             padding: const pw.EdgeInsets.only(top: 8),
             child: pw.Text(
-              settings?.authorizedSignatory ?? _t('signature', settings),
+              signatory ?? _t('signature', settings),
               style: pw.TextStyle(fontSize: baseFontSize),
               textAlign: pw.TextAlign.center,
             ),

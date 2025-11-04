@@ -4,6 +4,7 @@ import '../../../../core/navigation/app_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../providers/auth_provider.dart';
+import '../../../business/presentation/providers/business_provider.dart';
 import '../widgets/auth_text_field.dart';
 import '../widgets/auth_button.dart';
 import '../widgets/google_sign_in_button.dart';
@@ -37,6 +38,8 @@ class _SignUpPageState extends State<SignUpPage> {
     }
 
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final businessProvider = Provider.of<BusinessProvider>(context, listen: false);
+    
     final success = await authProvider.signUpWithEmail(
       _emailController.text.trim(),
       _passwordController.text,
@@ -45,7 +48,13 @@ class _SignUpPageState extends State<SignUpPage> {
     if (!mounted) return;
 
     if (success) {
-      Navigator.of(context).pushReplacementNamed(AppRouter.home);
+      // Check business profile (new user = no business)
+      await businessProvider.loadBusiness(authProvider.user!.uid);
+      
+      if (!mounted) return;
+      
+      // New user → show onboarding directly (no splash delay!)
+      Navigator.of(context).pushReplacementNamed(AppRouter.businessOnboarding);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -58,12 +67,30 @@ class _SignUpPageState extends State<SignUpPage> {
 
   Future<void> _handleGoogleSignUp() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final businessProvider = Provider.of<BusinessProvider>(context, listen: false);
+    
     final success = await authProvider.signInWithGoogle();
 
     if (!mounted) return;
 
     if (success) {
-      Navigator.of(context).pushReplacementNamed(AppRouter.home);
+      // Check if business exists
+      await businessProvider.loadBusiness(authProvider.user!.uid);
+      
+      if (!mounted) return;
+      
+      final currentUserId = authProvider.user!.uid;
+      final hasValidBusiness = businessProvider.business != null &&
+          businessProvider.business!.userId == currentUserId &&
+          businessProvider.hasCompletedOnboarding;
+      
+      if (hasValidBusiness) {
+        // Existing user - go to home
+        Navigator.of(context).pushReplacementNamed(AppRouter.home);
+      } else {
+        // New user - show onboarding directly
+        Navigator.of(context).pushReplacementNamed(AppRouter.businessOnboarding);
+      }
     } else {
       // Only show error message if it's not a cancellation
       if (authProvider.errorMessage != null) {

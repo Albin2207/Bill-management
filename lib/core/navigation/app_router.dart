@@ -46,6 +46,9 @@ import '../../features/accounting/presentation/pages/ledger_page.dart' as accoun
 import '../../features/accounting/presentation/pages/gst_report_page.dart';
 import '../../features/accounting/presentation/pages/stock_report_page.dart';
 import '../../features/accounting/presentation/pages/trial_balance_page.dart';
+import '../../features/business/presentation/pages/business_onboarding_page.dart';
+import '../../features/business/presentation/pages/business_details_page.dart';
+import '../../features/business/presentation/pages/business_logo_page.dart';
 
 class AppRouter {
   // Auth Routes
@@ -123,6 +126,11 @@ class AppRouter {
   static const String gstReport = '/accounting/gst-report';
   static const String stockReport = '/accounting/stock-report';
   static const String trialBalance = '/accounting/trial-balance';
+  
+  // Business Routes
+  static const String businessOnboarding = '/business-onboarding';
+  static const String businessDetails = '/business-details';
+  static const String businessLogo = '/business-logo';
 
   static Route<dynamic> generateRoute(RouteSettings routeSettings) {
     switch (routeSettings.name) {
@@ -259,6 +267,14 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const StockReportPage());
       case trialBalance:
         return MaterialPageRoute(builder: (_) => const TrialBalancePage());
+      
+      // Business Routes
+      case businessOnboarding:
+        return MaterialPageRoute(builder: (_) => const BusinessOnboardingPage());
+      case businessDetails:
+        return MaterialPageRoute(builder: (_) => const BusinessDetailsPage());
+      case businessLogo:
+        return MaterialPageRoute(builder: (_) => const BusinessLogoPage());
       
       // Not Found
       default:

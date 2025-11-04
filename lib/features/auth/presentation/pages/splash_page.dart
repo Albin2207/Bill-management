@@ -5,6 +5,7 @@ import '../../../../core/navigation/app_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../providers/auth_provider.dart';
+import '../../../business/presentation/providers/business_provider.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -28,6 +29,7 @@ class _SplashPageState extends State<SplashPage> {
       if (!mounted) return;
       
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final businessProvider = Provider.of<BusinessProvider>(context, listen: false);
       
       // Wait for auth check to complete
       await authProvider.checkAuthStatus();
@@ -36,7 +38,24 @@ class _SplashPageState extends State<SplashPage> {
       
       // Navigate based on auth status
       if (authProvider.isAuthenticated) {
-        Navigator.of(context).pushReplacementNamed(AppRouter.home);
+        // FORCE reload business for current user (clears old cache)
+        await businessProvider.loadBusiness(authProvider.user!.uid);
+        
+        if (!mounted) return;
+        
+        // Check business belongs to current user AND is complete
+        final currentUserId = authProvider.user!.uid;
+        final hasValidBusiness = businessProvider.business != null &&
+            businessProvider.business!.userId == currentUserId &&
+            businessProvider.hasCompletedOnboarding;
+        
+        if (hasValidBusiness) {
+          // Existing user with complete profile - go to home
+          Navigator.of(context).pushReplacementNamed(AppRouter.home);
+        } else {
+          // New user OR incomplete profile - show onboarding
+          Navigator.of(context).pushReplacementNamed(AppRouter.businessOnboarding);
+        }
       } else {
         Navigator.of(context).pushReplacementNamed(AppRouter.login);
       }

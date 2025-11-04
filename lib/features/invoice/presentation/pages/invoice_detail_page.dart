@@ -14,6 +14,7 @@ import '../../../payment/presentation/providers/payment_provider.dart';
 import '../../../payment/domain/entities/payment_entity.dart';
 import '../../../payment/data/models/payment_model.dart';
 import '../../../payment/presentation/widgets/payment_section_widget.dart';
+import '../../../business/presentation/providers/business_provider.dart';
 
 class InvoiceDetailPage extends StatefulWidget {
   final InvoiceEntity invoice;
@@ -773,16 +774,23 @@ class _InvoiceDetailPageState extends State<InvoiceDetailPage> {
       // Load document settings
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final settingsProvider = Provider.of<DocumentSettingsProvider>(context, listen: false);
+      final businessProvider = Provider.of<BusinessProvider>(context, listen: false);
       
       final userId = authProvider.user?.uid;
-      if (userId != null && settingsProvider.settings == null) {
-        await settingsProvider.loadSettings(userId);
+      if (userId != null) {
+        if (settingsProvider.settings == null) {
+          await settingsProvider.loadSettings(userId);
+        }
+        if (businessProvider.business == null) {
+          await businessProvider.loadBusiness(userId);
+        }
       }
 
-      // Generate PDF with settings
+      // Generate PDF with settings AND business data
       final pdfFile = await PDFService.generateInvoicePDF(
         widget.invoice,
         settings: settingsProvider.settings,
+        business: businessProvider.business,
       );
 
       if (!context.mounted) return;
@@ -840,16 +848,23 @@ class _InvoiceDetailPageState extends State<InvoiceDetailPage> {
       // Load document settings
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final settingsProvider = Provider.of<DocumentSettingsProvider>(context, listen: false);
+      final businessProvider = Provider.of<BusinessProvider>(context, listen: false);
       
       final userId = authProvider.user?.uid;
-      if (userId != null && settingsProvider.settings == null) {
-        await settingsProvider.loadSettings(userId);
+      if (userId != null) {
+        if (settingsProvider.settings == null) {
+          await settingsProvider.loadSettings(userId);
+        }
+        if (businessProvider.business == null) {
+          await businessProvider.loadBusiness(userId);
+        }
       }
 
-      // Generate PDF with settings
+      // Generate PDF with settings AND business data
       final pdfFile = await PDFService.generateInvoicePDF(
         widget.invoice,
         settings: settingsProvider.settings,
+        business: businessProvider.business,
       );
 
       if (!context.mounted) return;
