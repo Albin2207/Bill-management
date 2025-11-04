@@ -14,17 +14,6 @@ enum DocumentOrientation {
   landscape,
 }
 
-enum DocumentLanguage {
-  english,
-  hindi,
-  tamil,
-  telugu,
-  malayalam,
-  kannada,
-  gujarati,
-  marathi,
-}
-
 enum FontStyle {
   roboto,
   openSans,
@@ -54,7 +43,6 @@ class DocumentSettingsEntity extends Equatable {
   final bool showQRCode;
   
   // Content
-  final DocumentLanguage language;
   final String? customHeader;
   final String? customFooter;
   final String? defaultTerms;
@@ -105,7 +93,6 @@ class DocumentSettingsEntity extends Equatable {
     this.showSignature = true,
     this.showTerms = true,
     this.showQRCode = false,
-    this.language = DocumentLanguage.english,
     this.customHeader,
     this.customFooter,
     this.defaultTerms,
@@ -149,7 +136,6 @@ class DocumentSettingsEntity extends Equatable {
         showSignature,
         showTerms,
         showQRCode,
-        language,
         customHeader,
         customFooter,
         defaultTerms,

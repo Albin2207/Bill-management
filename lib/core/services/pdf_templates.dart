@@ -3,15 +3,8 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:intl/intl.dart';
 import '../../features/invoice/domain/entities/invoice_entity.dart';
 import '../../features/settings/domain/entities/document_settings_entity.dart';
-import '../utils/language_helper.dart';
 
 class PDFTemplates {
-  // Get translated label
-  static String _t(String key, DocumentSettingsEntity? settings) {
-    final lang = settings?.language ?? DocumentLanguage.english;
-    final translations = LanguageHelper.getTranslations(lang);
-    return translations[key] ?? key;
-  }
 
   static PdfColor _getPdfColor(String hexColor) {
     final hex = hexColor.replaceAll('#', '');
@@ -40,7 +33,7 @@ class PDFTemplates {
           mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
           children: [
             pw.Text(
-              _t('taxInvoice', settings),
+              'TAX INVOICE',
               style: pw.TextStyle(
                 fontSize: baseFontSize + 20,
                 fontWeight: pw.FontWeight.bold,
@@ -76,7 +69,7 @@ class PDFTemplates {
           crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: [
             pw.Text(
-              _t('taxInvoice', settings),
+              'TAX INVOICE',
               style: pw.TextStyle(
                 fontSize: baseFontSize + 24,
                 fontWeight: pw.FontWeight.bold,
@@ -110,7 +103,7 @@ class PDFTemplates {
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
           pw.Text(
-            _t('taxInvoice', settings),
+            'TAX INVOICE',
             style: pw.TextStyle(
               fontSize: baseFontSize + 18,
               fontWeight: pw.FontWeight.normal,
@@ -159,7 +152,7 @@ class PDFTemplates {
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
                 pw.Text(
-                  _t('taxInvoice', settings),
+                  'TAX INVOICE',
                   style: pw.TextStyle(
                     fontSize: baseFontSize + 16,
                     fontWeight: pw.FontWeight.bold,
@@ -232,7 +225,7 @@ class PDFTemplates {
                     borderRadius: pw.BorderRadius.circular(20),
                   ),
                   child: pw.Text(
-                    _t('taxInvoice', settings),
+                    'TAX INVOICE',
                     style: pw.TextStyle(
                       fontSize: baseFontSize + 14,
                       fontWeight: pw.FontWeight.bold,
@@ -282,7 +275,7 @@ class PDFTemplates {
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
                 pw.Text(
-                  _t('taxInvoice', settings),
+                  'TAX INVOICE',
                   style: pw.TextStyle(
                     fontSize: baseFontSize + 22,
                     fontWeight: pw.FontWeight.normal,

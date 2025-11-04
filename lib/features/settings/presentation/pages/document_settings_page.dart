@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../domain/entities/document_settings_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../business/presentation/providers/business_provider.dart';
 import '../providers/document_settings_provider.dart';
 import '../../../../core/services/pdf_service.dart';
 import '../../../../core/utils/sample_invoice_generator.dart';
@@ -38,7 +39,6 @@ class _DocumentSettingsPageState extends State<DocumentSettingsPage> with Single
   // Settings state
   DocumentTemplate _selectedTemplate = DocumentTemplate.classic;
   DocumentOrientation _orientation = DocumentOrientation.portrait;
-  DocumentLanguage _language = DocumentLanguage.english;
   FontStyle _fontStyle = FontStyle.roboto;
   double _fontSize = 12.0;
   String _primaryColor = '#2196F3';
@@ -87,17 +87,29 @@ class _DocumentSettingsPageState extends State<DocumentSettingsPage> with Single
   Future<void> _loadSettings() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final settingsProvider = Provider.of<DocumentSettingsProvider>(context, listen: false);
+    final businessProvider = Provider.of<BusinessProvider>(context, listen: false);
     
     final userId = authProvider.user?.uid;
     if (userId != null) {
-      await settingsProvider.loadSettings(userId);
+      // Load both settings and business data
+      await Future.wait([
+        settingsProvider.loadSettings(userId),
+        businessProvider.loadBusiness(userId),
+      ]);
       
       final settings = settingsProvider.settings;
-      if (settings != null) {
-        setState(() {
+      final business = businessProvider.business;
+      
+      // Get primary bank from business
+      final primaryBank = business?.bankAccounts.isNotEmpty == true
+          ? business!.bankAccounts.firstWhere((b) => b.isPrimary, orElse: () => business.bankAccounts.first)
+          : null;
+      
+      setState(() {
+        // Load template settings (if available)
+        if (settings != null) {
           _selectedTemplate = settings.template;
           _orientation = settings.orientation;
-          _language = settings.language;
           _fontStyle = settings.fontStyle;
           _fontSize = settings.fontSize;
           _primaryColor = settings.primaryColor;
@@ -112,30 +124,63 @@ class _DocumentSettingsPageState extends State<DocumentSettingsPage> with Single
           _includeTax = settings.includeTaxColumn;
           _roundOff = settings.roundOffTotal;
           
-          _companyNameController.text = settings.companyName ?? '';
-          _companyGSTINController.text = settings.companyGSTIN ?? '';
-          _companyAddressController.text = settings.companyAddress ?? '';
-          _companyPhoneController.text = settings.companyPhone ?? '';
-          _companyEmailController.text = settings.companyEmail ?? '';
-          _companyWebsiteController.text = settings.companyWebsite ?? '';
-          
-          _bankNameController.text = settings.bankName ?? '';
-          _accountNumberController.text = settings.accountNumber ?? '';
-          _ifscCodeController.text = settings.ifscCode ?? '';
-          _branchNameController.text = settings.branchName ?? '';
-          _upiIdController.text = settings.upiId ?? '';
-          
           _customHeaderController.text = settings.customHeader ?? '';
           _customFooterController.text = settings.customFooter ?? '';
-          _defaultTermsController.text = settings.defaultTerms ?? '';
-          
-          _isLoading = false;
-        });
-      } else {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+        }
+        
+        // Load company/bank details: Use settings first, fallback to business data
+        _companyNameController.text = (settings?.companyName?.isNotEmpty == true 
+            ? settings!.companyName 
+            : business?.businessName) ?? '';
+        
+        _companyGSTINController.text = (settings?.companyGSTIN?.isNotEmpty == true 
+            ? settings!.companyGSTIN 
+            : business?.gstin) ?? '';
+        
+        _companyAddressController.text = (settings?.companyAddress?.isNotEmpty == true 
+            ? settings!.companyAddress 
+            : business?.address) ?? '';
+        
+        _companyPhoneController.text = (settings?.companyPhone?.isNotEmpty == true 
+            ? settings!.companyPhone 
+            : business?.phone) ?? '';
+        
+        _companyEmailController.text = (settings?.companyEmail?.isNotEmpty == true 
+            ? settings!.companyEmail 
+            : business?.email) ?? '';
+        
+        _companyWebsiteController.text = (settings?.companyWebsite?.isNotEmpty == true 
+            ? settings!.companyWebsite 
+            : business?.website) ?? '';
+        
+        // Bank details: settings first, then business bank account
+        _bankNameController.text = (settings?.bankName?.isNotEmpty == true 
+            ? settings!.bankName 
+            : primaryBank?.bankName) ?? '';
+        
+        _accountNumberController.text = (settings?.accountNumber?.isNotEmpty == true 
+            ? settings!.accountNumber 
+            : primaryBank?.accountNumber) ?? '';
+        
+        _ifscCodeController.text = (settings?.ifscCode?.isNotEmpty == true 
+            ? settings!.ifscCode 
+            : primaryBank?.ifscCode) ?? '';
+        
+        _branchNameController.text = (settings?.branchName?.isNotEmpty == true 
+            ? settings!.branchName 
+            : primaryBank?.branchName) ?? '';
+        
+        _upiIdController.text = (settings?.upiId?.isNotEmpty == true 
+            ? settings!.upiId 
+            : business?.upiId) ?? '';
+        
+        // Terms: settings first, then business
+        _defaultTermsController.text = (settings?.defaultTerms?.isNotEmpty == true 
+            ? settings!.defaultTerms 
+            : business?.termsAndConditions) ?? '';
+        
+        _isLoading = false;
+      });
     }
   }
 
@@ -456,24 +501,29 @@ class _DocumentSettingsPageState extends State<DocumentSettingsPage> with Single
                   ),
                 ),
                 const SizedBox(height: 12),
-                DropdownButtonFormField<DocumentLanguage>(
-                  value: _language,
-                  decoration: const InputDecoration(
-                    labelText: 'Document Language',
-                    border: OutlineInputBorder(),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.blue.shade200),
                   ),
-                  isExpanded: true,
-                  items: DocumentLanguage.values.map((lang) {
-                    return DropdownMenuItem(
-                      value: lang,
-                      child: Text(_getLanguageName(lang)),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      _language = value!;
-                    });
-                  },
+                  child: Row(
+                    children: [
+                      Icon(Icons.info_outline, size: 16, color: Colors.blue.shade700),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'PDFs use English labels as per GST standards. All documents are bilingual-ready.',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.blue.shade900,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -948,26 +998,6 @@ class _DocumentSettingsPageState extends State<DocumentSettingsPage> with Single
     );
   }
 
-  String _getLanguageName(DocumentLanguage lang) {
-    switch (lang) {
-      case DocumentLanguage.english:
-        return 'English';
-      case DocumentLanguage.hindi:
-        return 'हिंदी (Hindi)';
-      case DocumentLanguage.tamil:
-        return 'தமிழ் (Tamil)';
-      case DocumentLanguage.telugu:
-        return 'తెలుగు (Telugu)';
-      case DocumentLanguage.malayalam:
-        return 'മലയാളം (Malayalam)';
-      case DocumentLanguage.kannada:
-        return 'ಕನ್ನಡ (Kannada)';
-      case DocumentLanguage.gujarati:
-        return 'ગુજરાતી (Gujarati)';
-      case DocumentLanguage.marathi:
-        return 'मराठी (Marathi)';
-    }
-  }
 
   Widget _buildColorOption(String hexColor, Color displayColor) {
     final isSelected = _primaryColor == hexColor;
@@ -1020,7 +1050,11 @@ class _DocumentSettingsPageState extends State<DocumentSettingsPage> with Single
       );
 
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final businessProvider = Provider.of<BusinessProvider>(context, listen: false);
       final userId = authProvider.user?.uid ?? 'preview_user';
+
+      // Get business data for logo/signature
+      final business = businessProvider.business;
 
       // Create temporary settings with current form values (NOT saved yet)
       final previewSettings = DocumentSettingsEntity(
@@ -1038,7 +1072,6 @@ class _DocumentSettingsPageState extends State<DocumentSettingsPage> with Single
         showSignature: _showSignature,
         showTerms: _showTerms,
         showQRCode: _showQRCode,
-        language: _language,
         customHeader: _customHeaderController.text.isNotEmpty 
             ? _customHeaderController.text 
             : null,
@@ -1097,11 +1130,11 @@ class _DocumentSettingsPageState extends State<DocumentSettingsPage> with Single
       // Generate sample invoice
       final sampleInvoice = SampleInvoiceGenerator.generateSampleInvoice();
 
-      // Generate PDF with preview settings (saved to temp folder, not Downloads)
+      // Generate PDF with preview settings and business data (saved to temp folder, not Downloads)
       final pdfFile = await PDFService.generateInvoicePDF(
         sampleInvoice,
         settings: previewSettings,
-        business: null, // Preview uses settings data only
+        business: business, // Pass business for logo/signature
         isPreview: true, // This saves to temp folder instead of Downloads
       );
 
@@ -1160,7 +1193,6 @@ class _DocumentSettingsPageState extends State<DocumentSettingsPage> with Single
       showSignature: _showSignature,
       showTerms: _showTerms,
       showQRCode: _showQRCode,
-      language: _language,
       customHeader: _customHeaderController.text.isNotEmpty 
           ? _customHeaderController.text 
           : null,

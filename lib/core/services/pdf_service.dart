@@ -8,16 +8,9 @@ import 'package:open_file/open_file.dart';
 import '../../features/invoice/domain/entities/invoice_entity.dart';
 import '../../features/settings/domain/entities/document_settings_entity.dart';
 import '../../features/business/domain/entities/business_entity.dart';
-import '../utils/language_helper.dart';
 import 'pdf_templates.dart';
 
 class PDFService {
-  // Helper to get translated label
-  static String _t(String key, DocumentSettingsEntity? settings) {
-    final lang = settings?.language ?? DocumentLanguage.english;
-    final translations = LanguageHelper.getTranslations(lang);
-    return translations[key] ?? key;
-  }
 
   static Future<File> generateInvoicePDF(
     InvoiceEntity invoice, {
@@ -42,25 +35,14 @@ class PDFService {
         margin: const pw.EdgeInsets.all(32),
         build: (pw.Context context) {
           return [
-            // Custom Header (if set)
-            if (settings?.customHeader != null && settings!.customHeader!.isNotEmpty) ...[
-              pw.Text(
-                settings.customHeader!,
-                style: pw.TextStyle(fontSize: baseFontSize + 2, fontStyle: pw.FontStyle.italic),
-                textAlign: pw.TextAlign.center,
-              ),
-              pw.SizedBox(height: 10),
-            ],
-            
-            // Template-based Header
+            // Template-based Header (Classic, Modern, Minimal, etc.)
             ...PDFTemplates.getTemplateHeader(invoice, settings, primaryColor, baseFontSize),
             pw.SizedBox(height: 20),
             
-            // Company Details (if enabled and available)
+            // Company Details (if template doesn't include them)
             if (settings?.showCompanyDetails ?? true)
-              _buildCompanyDetails(settings, business, baseFontSize),
-            if (settings?.showCompanyDetails ?? true)
-              pw.SizedBox(height: 20),
+              _buildCompanyInfo(invoice, settings, business, baseFontSize),
+            pw.SizedBox(height: 20),
             
             // Invoice Details
             _buildInvoiceDetails(invoice, settings, baseFontSize),
@@ -159,122 +141,116 @@ class PDFService {
            (settings?.defaultTerms != null && settings!.defaultTerms!.isNotEmpty);
   }
 
-  static pw.Widget _buildHeader(InvoiceEntity invoice, DocumentSettingsEntity? settings, PdfColor primaryColor, double baseFontSize) {
-    return pw.Row(
-      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-      children: [
-        pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
-          children: [
-            pw.Text(
-              'TAX INVOICE',
-              style: pw.TextStyle(
-                fontSize: baseFontSize + 16,
-                fontWeight: pw.FontWeight.bold,
-                color: primaryColor,
-              ),
-            ),
-            pw.SizedBox(height: 8),
-            pw.Text(
-              invoice.invoiceNumber,
-              style: pw.TextStyle(
-                fontSize: baseFontSize + 4,
-                fontWeight: pw.FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        pw.Container(
-          padding: const pw.EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          decoration: pw.BoxDecoration(
-            color: _getStatusPdfColor(invoice.paymentStatus),
-            borderRadius: pw.BorderRadius.circular(8),
-          ),
-          child: pw.Text(
-            invoice.paymentStatus.name.toUpperCase(),
-            style: pw.TextStyle(
-              color: PdfColors.white,
-              fontWeight: pw.FontWeight.bold,
-              fontSize: baseFontSize,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
 
-  static pw.Widget _buildCompanyDetails(
+  static pw.Widget _buildCompanyInfo(
+    InvoiceEntity invoice,
     DocumentSettingsEntity? settings,
     BusinessEntity? business,
     double baseFontSize,
   ) {
-    // Use business data as primary source, fall back to settings
-    final companyName = business?.businessName ?? settings?.companyName;
-    final gstin = business?.gstin ?? settings?.companyGSTIN;
-    final address = business?.address ?? settings?.companyAddress;
-    final phone = business?.phone ?? settings?.companyPhone;
+    final companyName = business?.businessName ?? settings?.companyName ?? 'Company Name';
+    final gstin = business?.gstin ?? settings?.companyGSTIN ?? '';
+    final address = business?.address ?? settings?.companyAddress ?? '';
+    final phone = business?.phone ?? settings?.companyPhone ?? '';
     final email = business?.email ?? settings?.companyEmail;
-    final website = business?.website ?? settings?.companyWebsite;
     
-    final hasDetails = companyName != null || gstin != null || address != null;
-    
-    if (!hasDetails) return pw.SizedBox();
-
+    // Simple company info box (template header already shows title)
     return pw.Container(
-      padding: const pw.EdgeInsets.all(16),
+      padding: const pw.EdgeInsets.all(12),
       decoration: pw.BoxDecoration(
-        color: PdfColors.blue50,
-        borderRadius: pw.BorderRadius.circular(8),
+        color: PdfColors.grey50,
+        border: pw.Border.all(color: PdfColors.grey300),
+        borderRadius: pw.BorderRadius.circular(4),
       ),
       child: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
-          if (companyName != null && companyName.isNotEmpty) ...[
-            pw.Text(
-              companyName,
-              style: pw.TextStyle(
-                fontSize: baseFontSize + 4,
-                fontWeight: pw.FontWeight.bold,
-              ),
+          pw.Text(
+            companyName,
+            style: pw.TextStyle(
+              fontSize: baseFontSize + 4,
+              fontWeight: pw.FontWeight.bold,
             ),
+          ),
+          if (gstin.isNotEmpty) ...[
             pw.SizedBox(height: 4),
-          ],
-          if (gstin != null && gstin.isNotEmpty)
             pw.Text('GSTIN: $gstin', style: pw.TextStyle(fontSize: baseFontSize)),
-          if (address != null && address.isNotEmpty) ...[
-            pw.SizedBox(height: 2),
-            pw.Text(address, style: pw.TextStyle(fontSize: baseFontSize)),
           ],
-          if (phone != null && phone.isNotEmpty) ...[
-            pw.SizedBox(height: 2),
-            pw.Text('Phone: $phone', style: pw.TextStyle(fontSize: baseFontSize)),
+          if (address.isNotEmpty) ...[
+            pw.SizedBox(height: 4),
+            pw.Text(address, style: pw.TextStyle(fontSize: baseFontSize - 1)),
           ],
-          if (email != null && email.isNotEmpty) ...[
-            pw.SizedBox(height: 2),
-            pw.Text('Email: $email', style: pw.TextStyle(fontSize: baseFontSize)),
-          ],
-          if (website != null && website.isNotEmpty) ...[
-            pw.SizedBox(height: 2),
-            pw.Text('Website: $website', style: pw.TextStyle(fontSize: baseFontSize)),
-          ],
+          pw.SizedBox(height: 6),
+          pw.Row(
+            children: [
+              if (phone.isNotEmpty)
+                pw.Text('Phone: $phone', style: pw.TextStyle(fontSize: baseFontSize - 1)),
+              if (phone.isNotEmpty && email != null && email.isNotEmpty)
+                pw.SizedBox(width: 20),
+              if (email != null && email.isNotEmpty)
+                pw.Text('Email: $email', style: pw.TextStyle(fontSize: baseFontSize - 1)),
+            ],
+          ),
         ],
       ),
     );
   }
 
+  static String _getInvoiceTypeName(InvoiceType type) {
+    switch (type) {
+      case InvoiceType.invoice:
+        return 'Tax Invoice';
+      case InvoiceType.bill:
+        return 'Purchase Bill';
+      case InvoiceType.salesOrder:
+        return 'Sales Order';
+      case InvoiceType.purchaseOrder:
+        return 'Purchase Order';
+      case InvoiceType.creditNote:
+        return 'Credit Note';
+      case InvoiceType.debitNote:
+        return 'Debit Note';
+      case InvoiceType.proFormaInvoice:
+        return 'Proforma Invoice';
+      case InvoiceType.quotation:
+        return 'Quotation';
+      case InvoiceType.deliveryChalan:
+        return 'Delivery Challan';
+      case InvoiceType.expense:
+        return 'Expense';
+      case InvoiceType.indirectIncome:
+        return 'Income Receipt';
+    }
+  }
+
+
   static pw.Widget _buildInvoiceDetails(InvoiceEntity invoice, DocumentSettingsEntity? settings, double baseFontSize) {
-    return pw.Row(
-      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-      children: [
-        pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
-          children: [
-            _buildDetailRow(_t('invoiceDate', settings), DateFormat('dd MMM yyyy').format(invoice.invoiceDate), baseFontSize),
-            if (invoice.dueDate != null)
-              _buildDetailRow(_t('dueDate', settings), DateFormat('dd MMM yyyy').format(invoice.dueDate!), baseFontSize),
-          ],
-        ),
-      ],
+    return pw.Container(
+      padding: const pw.EdgeInsets.all(12),
+      decoration: pw.BoxDecoration(
+        border: pw.Border.all(color: PdfColors.grey400, width: 0.5),
+        borderRadius: pw.BorderRadius.circular(4),
+      ),
+      child: pw.Row(
+        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+        children: [
+          pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              _buildDetailRow('Invoice Date:', DateFormat('dd MMM yyyy').format(invoice.invoiceDate), baseFontSize),
+              pw.SizedBox(height: 6),
+              if (invoice.dueDate != null)
+                _buildDetailRow('Due Date:', DateFormat('dd MMM yyyy').format(invoice.dueDate!), baseFontSize),
+            ],
+          ),
+          pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.end,
+            children: [
+              _buildDetailRow('State:', invoice.partyState ?? 'N/A', baseFontSize),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -282,16 +258,16 @@ class PDFService {
     return pw.Container(
       padding: const pw.EdgeInsets.all(16),
       decoration: pw.BoxDecoration(
-        color: PdfColors.grey100,
-        borderRadius: pw.BorderRadius.circular(8),
+        border: pw.Border.all(color: PdfColors.grey400, width: 0.5),
+        borderRadius: pw.BorderRadius.circular(4),
       ),
       child: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
           pw.Text(
-            '${_t('billTo', settings)}:',
+            'BILL TO:',
             style: pw.TextStyle(
-              fontSize: baseFontSize,
+              fontSize: baseFontSize - 1,
               fontWeight: pw.FontWeight.bold,
               color: PdfColors.grey700,
             ),
@@ -300,25 +276,28 @@ class PDFService {
           pw.Text(
             invoice.partyName,
             style: pw.TextStyle(
-              fontSize: baseFontSize + 4,
+              fontSize: baseFontSize + 3,
               fontWeight: pw.FontWeight.bold,
             ),
           ),
-          if (invoice.partyGstin != null) ...[
+          if (invoice.partyGstin != null && invoice.partyGstin!.isNotEmpty) ...[
             pw.SizedBox(height: 4),
-            pw.Text('${_t('gstin', settings)}: ${invoice.partyGstin}', style: pw.TextStyle(fontSize: baseFontSize)),
+            pw.Text('GSTIN: ${invoice.partyGstin}', style: pw.TextStyle(fontSize: baseFontSize)),
           ],
-          if (invoice.partyAddress != null) ...[
+          if (invoice.partyAddress != null && invoice.partyAddress!.isNotEmpty) ...[
             pw.SizedBox(height: 4),
             pw.Text(invoice.partyAddress!, style: pw.TextStyle(fontSize: baseFontSize)),
           ],
           if (invoice.partyCity != null || invoice.partyState != null) ...[
             pw.SizedBox(height: 4),
-            pw.Text('${invoice.partyCity ?? ''} ${invoice.partyState ?? ''}', style: pw.TextStyle(fontSize: baseFontSize)),
+            pw.Text(
+              '${invoice.partyCity ?? ''} ${invoice.partyState ?? ''}'.trim(),
+              style: pw.TextStyle(fontSize: baseFontSize),
+            ),
           ],
-          if (invoice.partyPhone != null) ...[
+          if (invoice.partyPhone != null && invoice.partyPhone!.isNotEmpty) ...[
             pw.SizedBox(height: 4),
-            pw.Text('${_t('phone', settings)}: ${invoice.partyPhone}', style: pw.TextStyle(fontSize: baseFontSize)),
+            pw.Text('Phone: ${invoice.partyPhone}', style: pw.TextStyle(fontSize: baseFontSize)),
           ],
         ],
       ),
@@ -336,12 +315,12 @@ class PDFService {
         pw.TableRow(
           decoration: pw.BoxDecoration(color: primaryColor.flatten()),
           children: [
-            _buildTableCell(_t('item', settings), isHeader: true, baseFontSize: baseFontSize),
-            if (showHSN) _buildTableCell(_t('hsn', settings), isHeader: true, baseFontSize: baseFontSize),
-            _buildTableCell(_t('qty', settings), isHeader: true, align: pw.TextAlign.center, baseFontSize: baseFontSize),
-            _buildTableCell(_t('rate', settings), isHeader: true, align: pw.TextAlign.right, baseFontSize: baseFontSize),
-            if (showTax) _buildTableCell(_t('gst', settings), isHeader: true, align: pw.TextAlign.center, baseFontSize: baseFontSize),
-            _buildTableCell(_t('amount', settings), isHeader: true, align: pw.TextAlign.right, baseFontSize: baseFontSize),
+            _buildTableCell('ITEM', isHeader: true, baseFontSize: baseFontSize),
+            if (showHSN) _buildTableCell('HSN', isHeader: true, baseFontSize: baseFontSize),
+            _buildTableCell('QTY', isHeader: true, align: pw.TextAlign.center, baseFontSize: baseFontSize),
+            _buildTableCell('RATE', isHeader: true, align: pw.TextAlign.right, baseFontSize: baseFontSize),
+            if (showTax) _buildTableCell('GST%', isHeader: true, align: pw.TextAlign.center, baseFontSize: baseFontSize),
+            _buildTableCell('AMOUNT', isHeader: true, align: pw.TextAlign.right, baseFontSize: baseFontSize),
           ],
         ),
         // Items
@@ -351,9 +330,9 @@ class PDFService {
               _buildTableCell(item.productName, baseFontSize: baseFontSize),
               if (showHSN) _buildTableCell(item.hsnCode, baseFontSize: baseFontSize),
               _buildTableCell('${item.quantity.toStringAsFixed(0)} ${item.unit}', align: pw.TextAlign.center, baseFontSize: baseFontSize),
-              _buildTableCell('₹${item.rate.toStringAsFixed(2)}', align: pw.TextAlign.right, baseFontSize: baseFontSize),
+              _buildTableCell('Rs. ${item.rate.toStringAsFixed(2)}', align: pw.TextAlign.right, baseFontSize: baseFontSize),
               if (showTax) _buildTableCell('${item.gstRate}%', align: pw.TextAlign.center, baseFontSize: baseFontSize),
-              _buildTableCell('₹${item.totalAmount.toStringAsFixed(2)}', align: pw.TextAlign.right, baseFontSize: baseFontSize),
+              _buildTableCell('Rs. ${item.totalAmount.toStringAsFixed(2)}', align: pw.TextAlign.right, baseFontSize: baseFontSize),
             ],
           );
         }),
@@ -376,20 +355,20 @@ class PDFService {
         ),
         child: pw.Column(
           children: [
-            _buildTotalRow(_t('subtotal', settings), invoice.subtotal, baseFontSize: baseFontSize, settings: settings),
+            _buildTotalRow('Subtotal', invoice.subtotal, baseFontSize: baseFontSize, settings: settings),
             if (invoice.totalDiscount > 0)
-              _buildTotalRow(_t('discount', settings), invoice.totalDiscount, isNegative: true, baseFontSize: baseFontSize, settings: settings),
-            _buildTotalRow(_t('taxableAmount', settings), invoice.taxableAmount, baseFontSize: baseFontSize, settings: settings),
+              _buildTotalRow('Discount', invoice.totalDiscount, isNegative: true, baseFontSize: baseFontSize, settings: settings),
+            _buildTotalRow('Taxable Amount', invoice.taxableAmount, baseFontSize: baseFontSize, settings: settings),
             pw.SizedBox(height: 8),
             if (invoice.cgst > 0) ...[
-              _buildTotalRow(_t('cgst', settings), invoice.cgst, baseFontSize: baseFontSize, settings: settings),
-              _buildTotalRow(_t('sgst', settings), invoice.sgst, baseFontSize: baseFontSize, settings: settings),
+              _buildTotalRow('CGST (${(invoice.cgst / invoice.taxableAmount * 100).toStringAsFixed(1)}%)', invoice.cgst, baseFontSize: baseFontSize, settings: settings),
+              _buildTotalRow('SGST (${(invoice.sgst / invoice.taxableAmount * 100).toStringAsFixed(1)}%)', invoice.sgst, baseFontSize: baseFontSize, settings: settings),
             ],
             if (invoice.igst > 0)
-              _buildTotalRow(_t('igst', settings), invoice.igst, baseFontSize: baseFontSize, settings: settings),
+              _buildTotalRow('IGST (${(invoice.igst / invoice.taxableAmount * 100).toStringAsFixed(1)}%)', invoice.igst, baseFontSize: baseFontSize, settings: settings),
             pw.Divider(thickness: 2, color: primaryColor),
             pw.SizedBox(height: 4),
-            _buildTotalRow(_t('grandTotal', settings), grandTotal, isBold: true, baseFontSize: baseFontSize + 2, settings: settings),
+            _buildTotalRow('GRAND TOTAL', grandTotal, isBold: true, baseFontSize: baseFontSize + 2, settings: settings),
           ],
         ),
       ),
@@ -430,7 +409,7 @@ class PDFService {
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
           pw.Text(
-            '${_t('bankDetails', settings)}:',
+            'BANK DETAILS:',
             style: pw.TextStyle(
               fontSize: baseFontSize,
               fontWeight: pw.FontWeight.bold,
@@ -438,22 +417,22 @@ class PDFService {
           ),
           pw.SizedBox(height: 8),
           if (bankName != null && bankName.isNotEmpty)
-            pw.Text('${_t('bank', settings)}: $bankName', style: pw.TextStyle(fontSize: baseFontSize)),
+            pw.Text('Bank: $bankName', style: pw.TextStyle(fontSize: baseFontSize)),
           if (accountNumber != null && accountNumber.isNotEmpty) ...[
             pw.SizedBox(height: 2),
-            pw.Text('${_t('accountNumber', settings)}: $accountNumber', style: pw.TextStyle(fontSize: baseFontSize)),
+            pw.Text('A/c No: $accountNumber', style: pw.TextStyle(fontSize: baseFontSize)),
           ],
           if (ifscCode != null && ifscCode.isNotEmpty) ...[
             pw.SizedBox(height: 2),
-            pw.Text('${_t('ifscCode', settings)}: $ifscCode', style: pw.TextStyle(fontSize: baseFontSize)),
+            pw.Text('IFSC: $ifscCode', style: pw.TextStyle(fontSize: baseFontSize)),
           ],
           if (branchName != null && branchName.isNotEmpty) ...[
             pw.SizedBox(height: 2),
-            pw.Text('${_t('branch', settings)}: $branchName', style: pw.TextStyle(fontSize: baseFontSize)),
+            pw.Text('Branch: $branchName', style: pw.TextStyle(fontSize: baseFontSize)),
           ],
           if (upiId != null && upiId.isNotEmpty) ...[
             pw.SizedBox(height: 2),
-            pw.Text('${_t('upi', settings)}: $upiId', style: pw.TextStyle(fontSize: baseFontSize)),
+            pw.Text('UPI: $upiId', style: pw.TextStyle(fontSize: baseFontSize)),
           ],
         ],
       ),
@@ -466,7 +445,7 @@ class PDFService {
       children: [
         if (invoice.notes != null && invoice.notes!.isNotEmpty) ...[
           pw.Text(
-            '${_t('notes', settings)}:',
+            'NOTES:',
             style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: baseFontSize),
           ),
           pw.SizedBox(height: 4),
@@ -476,7 +455,7 @@ class PDFService {
         if ((invoice.termsAndConditions != null && invoice.termsAndConditions!.isNotEmpty) ||
             (settings?.defaultTerms != null && settings!.defaultTerms!.isNotEmpty)) ...[
           pw.Text(
-            '${_t('termsAndConditions', settings)}:',
+            'TERMS & CONDITIONS:',
             style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: baseFontSize),
           ),
           pw.SizedBox(height: 4),
@@ -505,9 +484,9 @@ class PDFService {
         crossAxisAlignment: pw.CrossAxisAlignment.end,
         children: [
           pw.Text(
-            _t('authorizedSignatory', settings),
+            signatory ?? '',
             style: pw.TextStyle(
-              fontSize: baseFontSize,
+              fontSize: baseFontSize - 1,
               fontWeight: pw.FontWeight.bold,
             ),
           ),
@@ -521,8 +500,8 @@ class PDFService {
             ),
             padding: const pw.EdgeInsets.only(top: 8),
             child: pw.Text(
-              signatory ?? _t('signature', settings),
-              style: pw.TextStyle(fontSize: baseFontSize),
+              'Authorized Signatory',
+              style: pw.TextStyle(fontSize: baseFontSize - 1),
               textAlign: pw.TextAlign.center,
             ),
           ),
@@ -596,7 +575,7 @@ class PDFService {
             ),
           ),
           pw.Text(
-            '${isNegative ? '-' : ''}₹${amount.abs().toStringAsFixed(2)}',
+            '${isNegative ? '-' : ''}Rs. ${amount.abs().toStringAsFixed(2)}',
             style: pw.TextStyle(
               fontSize: baseFontSize,
               fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal,
@@ -619,17 +598,4 @@ class PDFService {
     return PdfColor(r, g, b);
   }
 
-  static PdfColor _getStatusPdfColor(PaymentStatus status) {
-    switch (status) {
-      case PaymentStatus.paid:
-        return PdfColors.green700;
-      case PaymentStatus.unpaid:
-      case PaymentStatus.pending:
-        return PdfColors.red700;
-      case PaymentStatus.partial:
-        return PdfColors.orange700;
-      case PaymentStatus.cancelled:
-        return PdfColors.grey700;
-    }
-  }
 }
