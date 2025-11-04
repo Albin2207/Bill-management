@@ -134,6 +134,7 @@ class _DebitNotesListPageState extends State<DebitNotesListPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'debit_notes_fab',
         onPressed: () async {
           final result = await Navigator.push(
             context,

@@ -134,6 +134,7 @@ class _InvoicesListPageState extends State<InvoicesListPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'invoices_fab',
         onPressed: () async {
           final result = await Navigator.push(
             context,

@@ -134,6 +134,7 @@ class _PurchasesListPageState extends State<PurchasesListPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'purchases_fab',
         onPressed: () async {
           final result = await Navigator.push(
             context,

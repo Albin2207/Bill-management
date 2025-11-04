@@ -50,6 +50,7 @@ class _ProductsListPageState extends State<ProductsListPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'products_fab',
         onPressed: () async {
           final result = await Navigator.pushNamed(context, AppRouter.addProduct);
           if (result == true) {

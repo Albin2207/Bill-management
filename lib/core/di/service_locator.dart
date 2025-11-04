@@ -41,6 +41,16 @@ import '../../features/settings/domain/repositories/document_settings_repository
 import '../../features/settings/domain/usecases/get_document_settings_usecase.dart';
 import '../../features/settings/domain/usecases/save_document_settings_usecase.dart';
 import '../../features/settings/presentation/providers/document_settings_provider.dart';
+import '../../features/payment/data/datasources/payment_remote_datasource.dart';
+import '../../features/payment/data/repositories/payment_repository_impl.dart';
+import '../../features/payment/domain/repositories/payment_repository.dart';
+import '../../features/payment/domain/usecases/add_payment_usecase.dart';
+import '../../features/payment/domain/usecases/get_all_payments_usecase.dart';
+import '../../features/payment/domain/usecases/get_payments_by_document_usecase.dart';
+import '../../features/payment/domain/usecases/get_payments_by_party_usecase.dart';
+import '../../features/payment/domain/usecases/delete_payment_usecase.dart';
+import '../../features/payment/presentation/providers/payment_provider.dart';
+import '../../features/accounting/presentation/providers/accounting_provider.dart';
 
 final sl = GetIt.instance;
 
@@ -195,5 +205,39 @@ Future<void> init() async {
       saveDocumentSettingsUsecase: sl(),
     ),
   );
+
+  // ========== Payment Feature ==========
+  // Data Sources
+  sl.registerLazySingleton<PaymentRemoteDataSource>(
+    () => PaymentRemoteDataSourceImpl(firestore: sl()),
+  );
+
+  // Repositories
+  sl.registerLazySingleton<PaymentRepository>(
+    () => PaymentRepositoryImpl(remoteDataSource: sl()),
+  );
+
+  // Use Cases
+  sl.registerLazySingleton(() => AddPaymentUsecase(sl()));
+  sl.registerLazySingleton(() => GetAllPaymentsUsecase(sl()));
+  sl.registerLazySingleton(() => GetPaymentsByDocumentUsecase(sl()));
+  sl.registerLazySingleton(() => GetPaymentsByPartyUsecase(sl()));
+  sl.registerLazySingleton(() => DeletePaymentUsecase(sl()));
+
+  // Providers
+  sl.registerFactory(
+    () => PaymentProvider(
+      addPaymentUsecase: sl(),
+      getAllPaymentsUsecase: sl(),
+      getPaymentsByDocumentUsecase: sl(),
+      getPaymentsByPartyUsecase: sl(),
+      deletePaymentUsecase: sl(),
+    ),
+  );
+
+  // ========== Accounting Feature ==========
+  // No data layer needed - uses existing invoice/payment data
+  // Provider only
+  sl.registerFactory(() => AccountingProvider());
 }
 

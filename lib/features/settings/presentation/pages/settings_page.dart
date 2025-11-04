@@ -43,6 +43,13 @@ class SettingsPage extends StatelessWidget {
             title: const Text('GST Settings'),
             onTap: () {},
           ),
+          ListTile(
+            leading: const Icon(Icons.payment),
+            title: const Text('Payments'),
+            onTap: () {
+              Navigator.pushNamed(context, AppRouter.payments);
+            },
+          ),
           const Divider(),
           ListTile(
             leading: const Icon(Icons.backup),

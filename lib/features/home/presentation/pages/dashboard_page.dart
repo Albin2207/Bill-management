@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../invoice/presentation/providers/invoice_provider.dart';
+import '../../../payment/presentation/providers/payment_provider.dart';
+import '../../../payment/domain/entities/payment_entity.dart';
 import '../../../invoice/domain/entities/invoice_entity.dart';
 import '../../../../core/navigation/app_router.dart';
 import '../widgets/quick_action_card.dart';
@@ -38,10 +40,12 @@ class _DashboardPageState extends State<DashboardPage> {
   void _loadDashboardData() {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final invoiceProvider = Provider.of<InvoiceProvider>(context, listen: false);
+    final paymentProvider = Provider.of<PaymentProvider>(context, listen: false);
     
     final userId = authProvider.user?.uid;
     if (userId != null) {
       invoiceProvider.loadInvoices(userId);
+      paymentProvider.loadAllPayments(userId);
     }
   }
 
@@ -116,33 +120,68 @@ class _DashboardPageState extends State<DashboardPage> {
         .fold(0.0, (sum, invoice) => sum + invoice.totalTax);
   }
 
-  double _calculateReceivables(List<InvoiceEntity> invoices) {
-    return invoices
-        .where((i) => i.invoiceType == InvoiceType.invoice && 
-                     i.paymentStatus != PaymentStatus.paid &&
+  double _calculateReceivables(List<InvoiceEntity> invoices, List<PaymentEntity> payments) {
+    // Total sales amount
+    final totalSales = invoices
+        .where((i) => (i.invoiceType == InvoiceType.invoice ||
+                      i.invoiceType == InvoiceType.salesOrder ||
+                      i.invoiceType == InvoiceType.deliveryChalan ||
+                      i.invoiceType == InvoiceType.creditNote) &&
                      i.paymentStatus != PaymentStatus.cancelled)
-        .fold(0.0, (sum, invoice) => sum + invoice.balanceAmount);
+        .fold(0.0, (sum, invoice) => sum + invoice.grandTotal);
+    
+    // Total received
+    final totalReceived = payments
+        .where((p) => p.direction == PaymentDirection.inward)
+        .fold(0.0, (sum, p) => sum + p.amount);
+    
+    return totalSales - totalReceived;
   }
 
-  double _calculatePayables(List<InvoiceEntity> invoices) {
-    return invoices
-        .where((i) => i.invoiceType == InvoiceType.bill && 
-                     i.paymentStatus != PaymentStatus.paid &&
+  double _calculatePayables(List<InvoiceEntity> invoices, List<PaymentEntity> payments) {
+    // Total purchases amount
+    final totalPurchases = invoices
+        .where((i) => (i.invoiceType == InvoiceType.bill ||
+                      i.invoiceType == InvoiceType.purchaseOrder ||
+                      i.invoiceType == InvoiceType.debitNote) &&
                      i.paymentStatus != PaymentStatus.cancelled)
-        .fold(0.0, (sum, invoice) => sum + invoice.balanceAmount);
+        .fold(0.0, (sum, invoice) => sum + invoice.grandTotal);
+    
+    // Total paid
+    final totalPaid = payments
+        .where((p) => p.direction == PaymentDirection.outward)
+        .fold(0.0, (sum, p) => sum + p.amount);
+    
+    return totalPurchases - totalPaid;
+  }
+
+  double _calculateTotalReceived(List<PaymentEntity> payments) {
+    return payments
+        .where((p) => p.direction == PaymentDirection.inward)
+        .fold(0.0, (sum, p) => sum + p.amount);
+  }
+
+  double _calculateTotalPaid(List<PaymentEntity> payments) {
+    return payments
+        .where((p) => p.direction == PaymentDirection.outward)
+        .fold(0.0, (sum, p) => sum + p.amount);
   }
 
   @override
   Widget build(BuildContext context) {
     final invoiceProvider = Provider.of<InvoiceProvider>(context);
+    final paymentProvider = Provider.of<PaymentProvider>(context);
     final filteredInvoices = _getFilteredInvoices(invoiceProvider.invoices);
     
     final salesAmount = _calculateSales(filteredInvoices);
     final purchasesAmount = _calculatePurchases(filteredInvoices);
     final totalRevenue = _calculateTotalRevenue(filteredInvoices);
     final gstCollected = _calculateGSTCollected(filteredInvoices);
-    final receivables = _calculateReceivables(invoiceProvider.invoices); // All time
-    final payables = _calculatePayables(invoiceProvider.invoices); // All time
+    final receivables = _calculateReceivables(invoiceProvider.invoices, paymentProvider.allPayments);
+    final payables = _calculatePayables(invoiceProvider.invoices, paymentProvider.allPayments);
+    final totalReceived = _calculateTotalReceived(paymentProvider.allPayments);
+    final totalPaid = _calculateTotalPaid(paymentProvider.allPayments);
+    final netCashFlow = totalReceived - totalPaid;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Home'),
@@ -282,6 +321,102 @@ class _DashboardPageState extends State<DashboardPage> {
                   ),
                 ),
               ],
+            ),
+            const SizedBox(height: 24),
+            
+            // Outstanding Section
+            Text(
+              'Outstanding',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppColors.onBackground,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildOutstandingCard(
+                    'To Receive',
+                    receivables,
+                    Icons.arrow_downward,
+                    Colors.green,
+                    totalReceived,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildOutstandingCard(
+                    'To Pay',
+                    payables,
+                    Icons.arrow_upward,
+                    Colors.red,
+                    totalPaid,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            // Net Cash Flow Card
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: netCashFlow >= 0
+                      ? [Colors.green.withOpacity(0.1), Colors.green.withOpacity(0.05)]
+                      : [Colors.red.withOpacity(0.1), Colors.red.withOpacity(0.05)],
+                ),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: netCashFlow >= 0 ? Colors.green.withOpacity(0.3) : Colors.red.withOpacity(0.3),
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        netCashFlow >= 0 ? Icons.trending_up : Icons.trending_down,
+                        color: netCashFlow >= 0 ? Colors.green : Colors.red,
+                        size: 32,
+                      ),
+                      const SizedBox(width: 12),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Net Cash Flow',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[600],
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            netCashFlow >= 0 ? 'Positive' : 'Negative',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: netCashFlow >= 0 ? Colors.green : Colors.red,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  Text(
+                    '₹${netCashFlow.abs().toStringAsFixed(0)}',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: netCashFlow >= 0 ? Colors.green : Colors.red,
+                    ),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 24),
             
@@ -469,11 +604,11 @@ class _DashboardPageState extends State<DashboardPage> {
                   },
                 ),
                 QuickActionCard(
-                  title: 'Payments Timeline',
+                  title: 'Payments',
                   icon: Icons.payment,
                   color: Colors.orange,
                   onTap: () {
-                    Navigator.pushNamed(context, AppRouter.paymentsTimeline);
+                    Navigator.pushNamed(context, AppRouter.payments);
                   },
                 ),
                 QuickActionCard(
@@ -686,6 +821,82 @@ class _DashboardPageState extends State<DashboardPage> {
             style: TextStyle(
               fontSize: 12,
               color: AppColors.onBackground.withOpacity(0.6),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOutstandingCard(
+    String title,
+    double amount,
+    IconData icon,
+    Color color,
+    double totalProcessed,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Icon(icon, color: color, size: 24),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  amount > 0 ? 'PENDING' : 'CLEAR',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: amount > 0 ? color : Colors.green,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[600],
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '₹${amount.toStringAsFixed(0)}',
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: amount > 0 ? color : Colors.green,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Processed: ₹${totalProcessed.toStringAsFixed(0)}',
+            style: TextStyle(
+              fontSize: 11,
+              color: Colors.grey[500],
             ),
           ),
         ],

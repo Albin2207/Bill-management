@@ -134,6 +134,7 @@ class _QuotationsListPageState extends State<QuotationsListPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'quotations_fab',
         onPressed: () async {
           final result = await Navigator.push(
             context,

@@ -153,6 +153,56 @@ class MorePage extends StatelessWidget {
               
               const Divider(height: 1),
               
+              // Account & Bookkeeping Section
+              _buildSectionTitle('Account & Bookkeeping'),
+              _buildListTile(
+                context,
+                icon: Icons.account_balance,
+                title: 'Profit & Loss',
+                subtitle: 'P&L Statement',
+                onTap: () {
+                  Navigator.pushNamed(context, AppRouter.profitLoss);
+                },
+              ),
+              _buildListTile(
+                context,
+                icon: Icons.book,
+                title: 'Ledger',
+                subtitle: 'Party-wise account statements',
+                onTap: () {
+                  Navigator.pushNamed(context, AppRouter.ledger);
+                },
+              ),
+              _buildListTile(
+                context,
+                icon: Icons.receipt_long,
+                title: 'GST Reports',
+                subtitle: 'GST collected, paid & summary',
+                onTap: () {
+                  Navigator.pushNamed(context, AppRouter.gstReport);
+                },
+              ),
+              _buildListTile(
+                context,
+                icon: Icons.inventory_2,
+                title: 'Stock Report',
+                subtitle: 'Stock valuation & movements',
+                onTap: () {
+                  Navigator.pushNamed(context, AppRouter.stockReport);
+                },
+              ),
+              _buildListTile(
+                context,
+                icon: Icons.balance,
+                title: 'Trial Balance',
+                subtitle: 'Simplified books balance',
+                onTap: () {
+                  Navigator.pushNamed(context, AppRouter.trialBalance);
+                },
+              ),
+              
+              const Divider(height: 1),
+              
               // Settings Section
               _buildSectionTitle('Settings'),
               _buildListTile(

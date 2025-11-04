@@ -14,6 +14,7 @@ class BillsListPage extends StatelessWidget {
         foregroundColor: AppColors.onPrimary,
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'bills_fab',
         onPressed: () {
           Navigator.pushNamed(context, AppRouter.createBill);
         },

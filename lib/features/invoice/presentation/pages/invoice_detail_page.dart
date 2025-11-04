@@ -10,11 +10,74 @@ import '../widgets/payment_reminder_widget.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../settings/presentation/providers/document_settings_provider.dart';
 import '../../../product/presentation/providers/product_provider.dart';
+import '../../../payment/presentation/providers/payment_provider.dart';
+import '../../../payment/domain/entities/payment_entity.dart';
+import '../../../payment/data/models/payment_model.dart';
+import '../../../payment/presentation/widgets/payment_section_widget.dart';
 
-class InvoiceDetailPage extends StatelessWidget {
+class InvoiceDetailPage extends StatefulWidget {
   final InvoiceEntity invoice;
 
   const InvoiceDetailPage({super.key, required this.invoice});
+
+  @override
+  State<InvoiceDetailPage> createState() => _InvoiceDetailPageState();
+}
+
+class _InvoiceDetailPageState extends State<InvoiceDetailPage> {
+  List<PaymentEntity> _payments = [];
+  bool _isLoadingPayments = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPayments();
+  }
+
+  Future<void> _loadPayments() async {
+    final paymentProvider = Provider.of<PaymentProvider>(context, listen: false);
+    final payments = await paymentProvider.getPaymentsByDocument(widget.invoice.id);
+    setState(() {
+      _payments = payments;
+      _isLoadingPayments = false;
+    });
+  }
+
+  Future<void> _handlePaymentAdded(BuildContext context, PaymentEntity payment) async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final paymentProvider = Provider.of<PaymentProvider>(context, listen: false);
+    
+    // Set user ID
+    final updatedPayment = PaymentModel.fromEntity(payment).copyWith(
+      userId: authProvider.user!.uid,
+    );
+    
+    // Add payment
+    final success = await paymentProvider.addPayment(updatedPayment);
+    
+    if (success) {
+      // Reload payments
+      await _loadPayments();
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Payment recorded successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to record payment: ${paymentProvider.error}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +101,7 @@ class InvoiceDetailPage extends StatelessWidget {
           children: [
             // Payment Reminder (if applicable)
             PaymentReminderWidget(
-              invoice: invoice,
+              invoice: widget.invoice,
               onSendReminder: () => _sendPaymentReminder(context),
             ),
             
@@ -78,7 +141,7 @@ class InvoiceDetailPage extends StatelessWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            invoice.invoiceNumber,
+                            widget.invoice.invoiceNumber,
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
@@ -92,11 +155,11 @@ class InvoiceDetailPage extends StatelessWidget {
                           vertical: 8,
                         ),
                         decoration: BoxDecoration(
-                          color: _getStatusColor(invoice.paymentStatus),
+                          color: _getStatusColor(widget.invoice.paymentStatus),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
-                          invoice.paymentStatus.name.toUpperCase(),
+                          widget.invoice.paymentStatus.name.toUpperCase(),
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -123,7 +186,7 @@ class InvoiceDetailPage extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              DateFormat('dd MMM yyyy').format(invoice.invoiceDate),
+                              DateFormat('dd MMM yyyy').format(widget.invoice.invoiceDate),
                               style: const TextStyle(
                                 fontWeight: FontWeight.w600,
                                 fontSize: 14,
@@ -132,7 +195,7 @@ class InvoiceDetailPage extends StatelessWidget {
                           ],
                         ),
                       ),
-                      if (invoice.dueDate != null)
+                      if (widget.invoice.dueDate != null)
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -145,7 +208,7 @@ class InvoiceDetailPage extends StatelessWidget {
                                 ),
                               ),
                               Text(
-                                DateFormat('dd MMM yyyy').format(invoice.dueDate!),
+                                DateFormat('dd MMM yyyy').format(widget.invoice.dueDate!),
                                 style: const TextStyle(
                                   fontWeight: FontWeight.w600,
                                   fontSize: 14,
@@ -169,27 +232,27 @@ class InvoiceDetailPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    invoice.partyName,
+                    widget.invoice.partyName,
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
                     ),
                   ),
-                  if (invoice.partyGstin != null) ...[
+                  if (widget.invoice.partyGstin != null) ...[
                     const SizedBox(height: 4),
-                    Text('GSTIN: ${invoice.partyGstin}'),
+                    Text('GSTIN: ${widget.invoice.partyGstin}'),
                   ],
-                  if (invoice.partyAddress != null) ...[
+                  if (widget.invoice.partyAddress != null) ...[
                     const SizedBox(height: 4),
-                    Text(invoice.partyAddress!),
+                    Text(widget.invoice.partyAddress!),
                   ],
-                  if (invoice.partyCity != null || invoice.partyState != null) ...[
+                  if (widget.invoice.partyCity != null || widget.invoice.partyState != null) ...[
                     const SizedBox(height: 4),
-                    Text('${invoice.partyCity ?? ''} ${invoice.partyState ?? ''}'),
+                    Text('${widget.invoice.partyCity ?? ''} ${widget.invoice.partyState ?? ''}'),
                   ],
-                  if (invoice.partyPhone != null) ...[
+                  if (widget.invoice.partyPhone != null) ...[
                     const SizedBox(height: 4),
-                    Text('Phone: ${invoice.partyPhone}'),
+                    Text('Phone: ${widget.invoice.partyPhone}'),
                   ],
                   const Divider(height: 32),
                   
@@ -203,7 +266,7 @@ class InvoiceDetailPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  ...invoice.items.asMap().entries.map((entry) {
+                  ...widget.invoice.items.asMap().entries.map((entry) {
                     final index = entry.key;
                     final item = entry.value;
                     return Column(
@@ -269,20 +332,20 @@ class InvoiceDetailPage extends StatelessWidget {
                   const Divider(height: 32),
                   
                   // Totals
-                  _buildTotalRow('Subtotal', invoice.subtotal),
-                  if (invoice.totalDiscount > 0)
-                    _buildTotalRow('Discount', -invoice.totalDiscount, isDiscount: true),
-                  _buildTotalRow('Taxable Amount', invoice.taxableAmount),
-                  if (invoice.cgst > 0) ...[
-                    _buildTotalRow('CGST', invoice.cgst),
-                    _buildTotalRow('SGST', invoice.sgst),
+                  _buildTotalRow('Subtotal', widget.invoice.subtotal),
+                  if (widget.invoice.totalDiscount > 0)
+                    _buildTotalRow('Discount', -widget.invoice.totalDiscount, isDiscount: true),
+                  _buildTotalRow('Taxable Amount', widget.invoice.taxableAmount),
+                  if (widget.invoice.cgst > 0) ...[
+                    _buildTotalRow('CGST', widget.invoice.cgst),
+                    _buildTotalRow('SGST', widget.invoice.sgst),
                   ],
-                  if (invoice.igst > 0)
-                    _buildTotalRow('IGST', invoice.igst),
+                  if (widget.invoice.igst > 0)
+                    _buildTotalRow('IGST', widget.invoice.igst),
                   const Divider(height: 24),
-                  _buildTotalRow('Grand Total', invoice.grandTotal, isBold: true),
+                  _buildTotalRow('Grand Total', widget.invoice.grandTotal, isBold: true),
                   
-                  if (invoice.notes != null) ...[
+                  if (widget.invoice.notes != null) ...[
                     const Divider(height: 32),
                     Text(
                       'Notes',
@@ -293,10 +356,10 @@ class InvoiceDetailPage extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    Text(invoice.notes!),
+                    Text(widget.invoice.notes!),
                   ],
                   
-                  if (invoice.termsAndConditions != null) ...[
+                  if (widget.invoice.termsAndConditions != null) ...[
                     const Divider(height: 32),
                     Text(
                       'Terms & Conditions',
@@ -307,11 +370,25 @@ class InvoiceDetailPage extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    Text(invoice.termsAndConditions!),
+                    Text(widget.invoice.termsAndConditions!),
                   ],
                 ],
               ),
             ),
+            
+            // Payment Section
+            if (!_isLoadingPayments)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: PaymentSectionWidget(
+                  invoice: widget.invoice,
+                  payments: _payments,
+                  onPaymentAdded: (payment) => _handlePaymentAdded(context, payment),
+                  onRefresh: _loadPayments,
+                ),
+              ),
+            
+            const SizedBox(height: 16),
           ],
         ),
       ),
@@ -455,8 +532,8 @@ class InvoiceDetailPage extends StatelessWidget {
 
   void _updateStatus(BuildContext context, PaymentStatus newStatus) async {
     debugPrint('🔵 _updateStatus called');
-    debugPrint('   Document: ${invoice.invoiceType.name} - ${invoice.invoiceNumber}');
-    debugPrint('   Current status: ${invoice.paymentStatus.name}');
+    debugPrint('   Document: ${widget.invoice.invoiceType.name} - ${widget.invoice.invoiceNumber}');
+    debugPrint('   Current status: ${widget.invoice.paymentStatus.name}');
     debugPrint('   New status: ${newStatus.name}');
     
     // GET ALL PROVIDERS AT THE START - before any async operations!
@@ -469,23 +546,23 @@ class InvoiceDetailPage extends StatelessWidget {
     // Calculate paid amount based on status
     double paidAmount = 0;
     if (newStatus == PaymentStatus.paid) {
-      paidAmount = invoice.grandTotal;
+      paidAmount = widget.invoice.grandTotal;
     } else if (newStatus == PaymentStatus.partial) {
       // TODO: Show dialog to enter partial amount
-      paidAmount = invoice.grandTotal / 2; // Default to 50%
+      paidAmount = widget.invoice.grandTotal / 2; // Default to 50%
     }
 
     // Handle stock restoration when cancelling
     final shouldRestoreStock = newStatus == PaymentStatus.cancelled && 
-                                invoice.paymentStatus != PaymentStatus.cancelled;
+                                widget.invoice.paymentStatus != PaymentStatus.cancelled;
     
     debugPrint('   Should restore stock? $shouldRestoreStock');
     debugPrint('   Reason: newStatus==cancelled? ${newStatus == PaymentStatus.cancelled}');
-    debugPrint('   Reason: currentStatus!=cancelled? ${invoice.paymentStatus != PaymentStatus.cancelled}');
+    debugPrint('   Reason: currentStatus!=cancelled? ${widget.invoice.paymentStatus != PaymentStatus.cancelled}');
     
     debugPrint('   Calling updateInvoiceStatus...');
     final success = await invoiceProvider.updateInvoiceStatus(
-      invoice.id,
+      widget.invoice.id,
       newStatus,
       paidAmount,
     );
@@ -532,14 +609,14 @@ class InvoiceDetailPage extends StatelessWidget {
   }
 
   Future<void> _restoreStock(AuthProvider authProvider, ProductProvider productProvider) async {
-    debugPrint('🔄 _restoreStock called for ${invoice.invoiceType.name} - ${invoice.invoiceNumber}');
-    debugPrint('📦 Items count: ${invoice.items.length}');
+    debugPrint('🔄 _restoreStock called for ${widget.invoice.invoiceType.name} - ${widget.invoice.invoiceNumber}');
+    debugPrint('📦 Items count: ${widget.invoice.items.length}');
     
     // Skip documents that don't affect stock
-    if (invoice.invoiceType == InvoiceType.proFormaInvoice ||
-        invoice.invoiceType == InvoiceType.quotation ||
-        invoice.invoiceType == InvoiceType.expense ||
-        invoice.invoiceType == InvoiceType.indirectIncome) {
+    if (widget.invoice.invoiceType == InvoiceType.proFormaInvoice ||
+        widget.invoice.invoiceType == InvoiceType.quotation ||
+        widget.invoice.invoiceType == InvoiceType.expense ||
+        widget.invoice.invoiceType == InvoiceType.indirectIncome) {
       debugPrint('⏭️ Skipping - document type does not affect stock');
       return; // These documents never touch stock
     }
@@ -551,10 +628,10 @@ class InvoiceDetailPage extends StatelessWidget {
         await productProvider.loadProducts(userId);
       }
 
-      debugPrint('📋 Processing ${invoice.items.length} items...');
+      debugPrint('📋 Processing ${widget.invoice.items.length} items...');
       
       // Process each item
-      for (final item in invoice.items) {
+      for (final item in widget.invoice.items) {
         debugPrint('  → Item: ${item.productName} (ID: ${item.productId})');
 
         // Find the product
@@ -576,9 +653,9 @@ class InvoiceDetailPage extends StatelessWidget {
         // Calculate stock adjustment based on document type
         double stockAdjustment = 0;
         
-        debugPrint('  📊 Document type: ${invoice.invoiceType.name}');
+        debugPrint('  📊 Document type: ${widget.invoice.invoiceType.name}');
         
-        switch (invoice.invoiceType) {
+        switch (widget.invoice.invoiceType) {
           // SALES DOCUMENTS (originally deducted stock, so ADD BACK on cancel)
           case InvoiceType.invoice:
           case InvoiceType.salesOrder:
@@ -608,7 +685,7 @@ class InvoiceDetailPage extends StatelessWidget {
           
           // Should never reach here due to initial check
           default:
-            debugPrint('  ⚠️ Unknown document type: ${invoice.invoiceType.name}');
+            debugPrint('  ⚠️ Unknown document type: ${widget.invoice.invoiceType.name}');
             continue;
         }
         
@@ -704,7 +781,7 @@ class InvoiceDetailPage extends StatelessWidget {
 
       // Generate PDF with settings
       final pdfFile = await PDFService.generateInvoicePDF(
-        invoice,
+        widget.invoice,
         settings: settingsProvider.settings,
       );
 
@@ -771,7 +848,7 @@ class InvoiceDetailPage extends StatelessWidget {
 
       // Generate PDF with settings
       final pdfFile = await PDFService.generateInvoicePDF(
-        invoice,
+        widget.invoice,
         settings: settingsProvider.settings,
       );
 
@@ -781,8 +858,8 @@ class InvoiceDetailPage extends StatelessWidget {
       // Share
       await ShareService.shareFile(
         file: pdfFile,
-        subject: 'Invoice ${invoice.invoiceNumber}',
-        text: 'Please find the invoice for ${invoice.partyName}\n\nTotal Amount: ₹${invoice.grandTotal.toStringAsFixed(2)}',
+        subject: 'Invoice ${widget.invoice.invoiceNumber}',
+        text: 'Please find the invoice for ${widget.invoice.partyName}\n\nTotal Amount: ₹${widget.invoice.grandTotal.toStringAsFixed(2)}',
       );
     } catch (e) {
       if (!context.mounted) return;
@@ -817,8 +894,8 @@ class InvoiceDetailPage extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.chat, color: Colors.green),
               title: const Text('WhatsApp'),
-              subtitle: Text(invoice.partyPhone ?? 'No phone number'),
-              onTap: invoice.partyPhone != null ? () {
+              subtitle: Text(widget.invoice.partyPhone ?? 'No phone number'),
+              onTap: widget.invoice.partyPhone != null ? () {
                 Navigator.pop(context);
                 _sendReminderViaWhatsApp(context);
               } : null,
@@ -835,8 +912,8 @@ class InvoiceDetailPage extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.sms, color: Colors.orange),
               title: const Text('SMS'),
-              subtitle: Text(invoice.partyPhone ?? 'No phone number'),
-              onTap: invoice.partyPhone != null ? () {
+              subtitle: Text(widget.invoice.partyPhone ?? 'No phone number'),
+              onTap: widget.invoice.partyPhone != null ? () {
                 Navigator.pop(context);
                 _sendReminderViaSMS(context);
               } : null,

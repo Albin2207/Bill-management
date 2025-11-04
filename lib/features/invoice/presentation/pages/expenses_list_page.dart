@@ -70,6 +70,7 @@ class _ExpensesListPageState extends State<ExpensesListPage> {
               },
             ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'expenses_fab',
         onPressed: () async {
           final result = await Navigator.push(
             context,

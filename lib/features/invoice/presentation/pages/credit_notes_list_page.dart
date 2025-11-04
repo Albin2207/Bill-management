@@ -134,6 +134,7 @@ class _CreditNotesListPageState extends State<CreditNotesListPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'credit_notes_fab',
         onPressed: () async {
           final result = await Navigator.push(
             context,

@@ -128,6 +128,7 @@ class _DeliveryChallansListPageState extends State<DeliveryChallansListPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'delivery_challans_fab',
         onPressed: () async {
           final result = await Navigator.push(
             context,

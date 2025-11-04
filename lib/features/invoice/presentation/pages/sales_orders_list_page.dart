@@ -138,6 +138,7 @@ class _SalesOrdersListPageState extends State<SalesOrdersListPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'sales_orders_fab',
         onPressed: () async {
           final result = await Navigator.push(
             context,

@@ -6,6 +6,7 @@ import '../../../auth/presentation/providers/auth_provider.dart';
 import '../providers/party_provider.dart';
 import '../../domain/entities/party_entity.dart';
 import 'edit_party_page.dart';
+import 'party_detail_page.dart';
 
 class PartiesListPage extends StatefulWidget {
   const PartiesListPage({super.key});
@@ -50,6 +51,7 @@ class _PartiesListPageState extends State<PartiesListPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'parties_fab',
         onPressed: () async {
           final result = await Navigator.pushNamed(context, AppRouter.addParty);
           if (result == true) {
@@ -236,6 +238,22 @@ class _PartiesListPageState extends State<PartiesListPage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            ListTile(
+              leading: const Icon(Icons.info, color: AppColors.primary),
+              title: const Text('View Details'),
+              onTap: () async {
+                Navigator.pop(context);
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PartyDetailPage(party: party),
+                  ),
+                );
+                if (result == true) {
+                  _loadParties();
+                }
+              },
+            ),
             ListTile(
               leading: const Icon(Icons.edit, color: Colors.blue),
               title: const Text('Edit Party'),

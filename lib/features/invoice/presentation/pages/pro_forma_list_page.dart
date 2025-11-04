@@ -155,6 +155,7 @@ class _ProFormaListPageState extends State<ProFormaListPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'pro_forma_fab',
         onPressed: () async {
           final result = await Navigator.push(
             context,

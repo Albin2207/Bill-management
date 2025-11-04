@@ -70,6 +70,7 @@ class _IndirectIncomeListPageState extends State<IndirectIncomeListPage> {
               },
             ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'indirect_income_fab',
         onPressed: () async {
           final result = await Navigator.push(
             context,

@@ -35,11 +35,17 @@ import '../../features/party/presentation/pages/add_party_page.dart';
 import '../../features/product/presentation/pages/products_list_page.dart';
 import '../../features/product/presentation/pages/add_product_page.dart';
 import '../../features/report/presentation/pages/reports_page.dart';
+import '../../features/payment/presentation/pages/payments_page.dart';
 import '../../features/home/presentation/pages/insights_page.dart';
 import '../../features/gst_return/presentation/pages/gst_returns_page.dart';
 import '../../features/ledger/presentation/pages/ledger_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
 import '../../features/settings/presentation/pages/document_settings_page.dart';
+import '../../features/accounting/presentation/pages/profit_loss_page.dart';
+import '../../features/accounting/presentation/pages/ledger_page.dart' as accounting_ledger;
+import '../../features/accounting/presentation/pages/gst_report_page.dart';
+import '../../features/accounting/presentation/pages/stock_report_page.dart';
+import '../../features/accounting/presentation/pages/trial_balance_page.dart';
 
 class AppRouter {
   // Auth Routes
@@ -69,6 +75,9 @@ class AppRouter {
   
   // Report Routes
   static const String reports = '/reports';
+  
+  // Payment Route
+  static const String payments = '/payments';
   
   // GST Returns Route
   static const String gstReturns = '/gst-returns';
@@ -108,6 +117,12 @@ class AppRouter {
   static const String invoiceTemplates = '/invoice-templates';
   static const String documentSettings = '/document-settings';
   static const String backupRestore = '/backup-restore';
+  
+  // Accounting Routes
+  static const String profitLoss = '/accounting/profit-loss';
+  static const String gstReport = '/accounting/gst-report';
+  static const String stockReport = '/accounting/stock-report';
+  static const String trialBalance = '/accounting/trial-balance';
 
   static Route<dynamic> generateRoute(RouteSettings routeSettings) {
     switch (routeSettings.name) {
@@ -142,13 +157,17 @@ class AppRouter {
       case products:
         return MaterialPageRoute(builder: (_) => const ProductsListPage());
       
-      // Ledger Route
+      // Ledger Route (Accounting Ledger)
       case ledger:
-        return MaterialPageRoute(builder: (_) => const LedgerPage());
+        return MaterialPageRoute(builder: (_) => const accounting_ledger.LedgerPage());
       
       // Report Routes
       case reports:
         return MaterialPageRoute(builder: (_) => const ReportsPage());
+      
+      // Payment Route
+      case payments:
+        return MaterialPageRoute(builder: (_) => const PaymentsPage());
       
       // GST Returns Route
       case gstReturns:
@@ -230,6 +249,16 @@ class AppRouter {
             title: _getPageTitle(routeSettings.name ?? ''),
           ),
         );
+      
+      // Accounting Routes
+      case profitLoss:
+        return MaterialPageRoute(builder: (_) => const ProfitLossPage());
+      case gstReport:
+        return MaterialPageRoute(builder: (_) => const GSTReportPage());
+      case stockReport:
+        return MaterialPageRoute(builder: (_) => const StockReportPage());
+      case trialBalance:
+        return MaterialPageRoute(builder: (_) => const TrialBalancePage());
       
       // Not Found
       default:
