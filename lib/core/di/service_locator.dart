@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/services/cloudinary_service.dart';
 import '../../features/auth/data/datasources/auth_remote_datasource.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
@@ -58,6 +59,10 @@ import '../../features/business/domain/usecases/get_business_usecase.dart';
 import '../../features/business/domain/usecases/save_business_usecase.dart';
 import '../../features/business/domain/usecases/update_business_usecase.dart';
 import '../../features/business/presentation/providers/business_provider.dart';
+import '../../features/onboarding/data/datasources/onboarding_local_datasource.dart';
+import '../../features/onboarding/data/repositories/onboarding_repository_impl.dart';
+import '../../features/onboarding/domain/repositories/onboarding_repository.dart';
+import '../../features/onboarding/presentation/providers/onboarding_provider.dart';
 
 final sl = GetIt.instance;
 
@@ -73,6 +78,10 @@ Future<void> init() async {
       ],
     ),
   );
+  
+  // Shared Preferences
+  final sharedPreferences = await SharedPreferences.getInstance();
+  sl.registerLazySingleton(() => sharedPreferences);
   
   // ========== Services ==========
   sl.registerLazySingleton(() => CloudinaryService());
@@ -270,6 +279,22 @@ Future<void> init() async {
       saveBusinessUsecase: sl(),
       updateBusinessUsecase: sl(),
     ),
+  );
+
+  // ========== Onboarding Feature ==========
+  // Data Sources
+  sl.registerLazySingleton<OnboardingLocalDataSource>(
+    () => OnboardingLocalDataSourceImpl(sharedPreferences: sl()),
+  );
+
+  // Repositories
+  sl.registerLazySingleton<OnboardingRepository>(
+    () => OnboardingRepositoryImpl(localDataSource: sl()),
+  );
+
+  // Providers
+  sl.registerFactory(
+    () => OnboardingProvider(repository: sl()),
   );
 }
 

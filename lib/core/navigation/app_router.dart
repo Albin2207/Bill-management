@@ -51,10 +51,12 @@ import '../../features/business/presentation/pages/business_details_page.dart';
 import '../../features/business/presentation/pages/business_logo_page.dart';
 import '../../features/settings/presentation/pages/privacy_policy_page.dart';
 import '../../features/settings/presentation/pages/feedback_page.dart';
+import '../../features/onboarding/presentation/pages/app_onboarding_page.dart';
 
 class AppRouter {
   // Auth Routes
   static const String splash = '/';
+  static const String appOnboarding = '/app-onboarding';
   static const String login = '/login';
   static const String signUp = '/signup';
   
@@ -143,6 +145,8 @@ class AppRouter {
       // Auth Routes
       case splash:
         return MaterialPageRoute(builder: (_) => const SplashPage());
+      case appOnboarding:
+        return MaterialPageRoute(builder: (_) => const AppOnboardingPage());
       case login:
         return MaterialPageRoute(builder: (_) => const LoginPage());
       case signUp:

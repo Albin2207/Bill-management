@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:lottie/lottie.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../providers/business_provider.dart';
@@ -155,38 +154,52 @@ class _BusinessOnboardingPageState extends State<BusinessOnboardingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Progress Indicator
-            _buildProgressIndicator(),
-            
-            // Page Content
-            Expanded(
-              child: Form(
-                key: _formKey,
-                child: PageView(
-                  controller: _pageController,
-                  physics: const NeverScrollableScrollPhysics(),
-                  onPageChanged: (page) {
-                    setState(() => _currentPage = page);
-                  },
-                  children: [
-                    _buildWelcomePage(),
-                    _buildBasicInfoPage(),
-                    _buildContactPage(),
-                    _buildBankDetailsPage(),
-                    _buildTermsPage(),
-                    _buildCompletePage(),
-                  ],
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppColors.primary.withOpacity(0.03),
+              Colors.white,
+              AppColors.primary.withOpacity(0.02),
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              // Modern Progress Indicator
+              _buildProgressIndicator(),
+              
+              // Page Content
+              Expanded(
+                child: Form(
+                  key: _formKey,
+                  child: PageView(
+                    controller: _pageController,
+                    physics: const NeverScrollableScrollPhysics(),
+                    onPageChanged: (page) {
+                      // Dismiss keyboard when changing pages
+                      FocusScope.of(context).unfocus();
+                      setState(() => _currentPage = page);
+                    },
+                    children: [
+                      _buildWelcomePage(),
+                      _buildBasicInfoPage(),
+                      _buildContactPage(),
+                      _buildBankDetailsPage(),
+                      _buildTermsPage(),
+                      _buildCompletePage(),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            
-            // Navigation Buttons
-            _buildNavigationButtons(),
-          ],
+              
+              // Modern Navigation Buttons
+              _buildNavigationButtons(),
+            ],
+          ),
         ),
       ),
     );
@@ -194,20 +207,51 @@ class _BusinessOnboardingPageState extends State<BusinessOnboardingPage> {
 
   Widget _buildProgressIndicator() {
     return Container(
-      padding: const EdgeInsets.all(20),
-      child: Row(
-        children: List.generate(6, (index) {
-          return Expanded(
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 4),
-              height: 4,
-              decoration: BoxDecoration(
-                color: index <= _currentPage ? AppColors.primary : Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Step ${_currentPage + 1} of 6',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.primary,
+                ),
               ),
+              Text(
+                '${(((_currentPage + 1) / 6) * 100).toInt()}%',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: LinearProgressIndicator(
+              value: (_currentPage + 1) / 6,
+              minHeight: 8,
+              backgroundColor: Colors.grey.shade200,
+              valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
             ),
-          );
-        }),
+          ),
+        ],
       ),
     );
   }
@@ -219,50 +263,94 @@ class _BusinessOnboardingPageState extends State<BusinessOnboardingPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Lottie Animation (using online JSON)
-            Lottie.network(
-              'https://lottie.host/4f3e6e6d-5f3a-4c5e-8c3a-3d4f5e6a7b8c/9K3jL4mN5p.json',
-              width: 250,
-              height: 250,
-              errorBuilder: (context, error, stackTrace) {
-                return const Icon(Icons.business, size: 150, color: AppColors.primary);
+            // Animated Icon
+            TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0.0, end: 1.0),
+              duration: const Duration(milliseconds: 800),
+              curve: Curves.elasticOut,
+              builder: (context, value, child) {
+                return Transform.scale(
+                  scale: value,
+                  child: Container(
+                    width: 180,
+                    height: 180,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          AppColors.primary.withOpacity(0.2),
+                          AppColors.primary.withOpacity(0.1),
+                        ],
+                      ),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.business_center,
+                      size: 90,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                );
               },
             ),
-            const SizedBox(height: 32),
-            const Text(
-              'Welcome to Billing Management!',
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Let\'s set up your business profile\nto get started with professional billing',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[600],
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 32),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.blue.shade50,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
+            const SizedBox(height: 40),
+            TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0.0, end: 1.0),
+              duration: const Duration(milliseconds: 1000),
+              curve: Curves.easeOut,
+              builder: (context, value, child) {
+                return Opacity(
+                  opacity: value,
+                  child: Transform.translate(
+                    offset: Offset(0, 20 * (1 - value)),
+                    child: child,
+                  ),
+                );
+              },
+              child: Column(
                 children: [
-                  Icon(Icons.timer, color: Colors.blue[700]),
-                  const SizedBox(width: 12),
                   Text(
-                    'Takes only 2-3 minutes',
+                    'Let\'s Setup Your Business',
                     style: TextStyle(
-                      color: Colors.blue[700],
-                      fontWeight: FontWeight.w600,
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary,
+                      letterSpacing: -0.5,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Set up your business profile\nto get started with professional billing',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey.shade600,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 32),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade50,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.blue.shade200),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.timer_outlined, color: Colors.blue.shade700, size: 20),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Takes only 2-3 minutes',
+                          style: TextStyle(
+                            color: Colors.blue.shade700,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -639,58 +727,117 @@ class _BusinessOnboardingPageState extends State<BusinessOnboardingPage> {
   }
 
   Widget _buildCompletePage() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Success Animation
-            Lottie.network(
-              'https://lottie.host/success-animation.json',
-              width: 200,
-              height: 200,
-              errorBuilder: (context, error, stackTrace) {
-                return const Icon(Icons.check_circle, size: 120, color: Colors.green);
-              },
+    // Dismiss keyboard immediately on this page
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      FocusScope.of(context).unfocus();
+    });
+    
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(32),
+      child: Column(
+        children: [
+          const SizedBox(height: 60),
+          
+          // Success Animation - Fast and smooth
+          TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0.0, end: 1.0),
+            duration: const Duration(milliseconds: 600),
+            curve: Curves.easeOut,
+            builder: (context, value, child) {
+              return Transform.scale(
+                scale: value,
+                child: Container(
+                  width: 160,
+                  height: 160,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Colors.green.shade400,
+                        Colors.green.shade600,
+                      ],
+                    ),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.green.withOpacity(0.4),
+                        blurRadius: 30,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.check_circle_outline,
+                    size: 80,
+                    color: Colors.white,
+                  ),
+                ),
+              );
+            },
+          ),
+          
+          const SizedBox(height: 40),
+          
+          TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0.0, end: 1.0),
+            duration: const Duration(milliseconds: 800),
+            curve: Curves.easeOut,
+            builder: (context, value, child) {
+              return Opacity(
+                opacity: value,
+                child: Transform.translate(
+                  offset: Offset(0, 20 * (1 - value)),
+                  child: child,
+                ),
+              );
+            },
+            child: Column(
+              children: [
+                Text(
+                  '🎉 All Set!',
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.green.shade700,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Your business profile is ready.\nLet\'s start managing your billing!',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey.shade600,
+                    height: 1.5,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
-            const SizedBox(height: 32),
-            const Text(
-              'All Set!',
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color: Colors.green,
-              ),
+          ),
+          
+          const SizedBox(height: 32),
+          
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.green.shade50,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.green.shade200),
             ),
-            const SizedBox(height: 16),
-            Text(
-              'Your business profile is ready.\nLet\'s start managing your billing!',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[600],
-              ),
-              textAlign: TextAlign.center,
+            child: Column(
+              children: [
+                _buildSummaryRow(Icons.business, _businessNameController.text),
+                const Divider(height: 24),
+                _buildSummaryRow(Icons.receipt_long, _gstinController.text),
+                const Divider(height: 24),
+                _buildSummaryRow(Icons.phone, _phoneController.text),
+              ],
             ),
-            const SizedBox(height: 32),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.green.shade50,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                children: [
-                  _buildSummaryRow(Icons.business, _businessNameController.text),
-                  const Divider(height: 24),
-                  _buildSummaryRow(Icons.receipt_long, _gstinController.text),
-                  const Divider(height: 24),
-                  _buildSummaryRow(Icons.phone, _phoneController.text),
-                ],
-              ),
-            ),
-          ],
-        ),
+          ),
+          
+          const SizedBox(height: 32),
+        ],
       ),
     );
   }
@@ -717,10 +864,9 @@ class _BusinessOnboardingPageState extends State<BusinessOnboardingPage> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
-            spreadRadius: 1,
-            blurRadius: 5,
-            offset: const Offset(0, -2),
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 20,
+            offset: const Offset(0, -5),
           ),
         ],
       ),
@@ -728,15 +874,17 @@ class _BusinessOnboardingPageState extends State<BusinessOnboardingPage> {
         children: [
           if (_currentPage > 0)
             Expanded(
-              child: OutlinedButton(
+              child: OutlinedButton.icon(
                 onPressed: _previousPage,
+                icon: const Icon(Icons.arrow_back, size: 20),
+                label: const Text('Back'),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
+                  side: BorderSide(color: AppColors.primary, width: 2),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(16),
                   ),
                 ),
-                child: const Text('Back'),
               ),
             ),
           if (_currentPage > 0) const SizedBox(width: 16),
@@ -774,25 +922,46 @@ class _BusinessOnboardingPageState extends State<BusinessOnboardingPage> {
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
+                elevation: 2,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                 ),
               ),
               child: Consumer<BusinessProvider>(
                 builder: (context, businessProvider, child) {
                   if (businessProvider.isLoading && _currentPage == 5) {
-                    return const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      ),
+                    return const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        ),
+                        SizedBox(width: 12),
+                        Text(
+                          'Saving...',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                      ],
                     );
                   }
-                  return Text(
-                    _currentPage == 5 ? 'Complete Setup' : 'Continue',
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        _currentPage == 5 ? 'Complete Setup' : 'Continue',
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(width: 8),
+                      Icon(
+                        _currentPage == 5 ? Icons.check : Icons.arrow_forward,
+                        size: 20,
+                      ),
+                    ],
                   );
                 },
               ),
