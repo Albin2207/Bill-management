@@ -55,5 +55,17 @@ service cloud.firestore {
       allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
       allow update, delete: if isOwner(resource.data.userId);
     }
+    
+    // Feedback Collection
+    match /feedback/{feedbackId} {
+      // Users can create their own feedback
+      allow create: if isAuthenticated();
+      // Users can read only their own feedback
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      // Only the feedback owner can update their feedback
+      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      // No delete allowed to maintain feedback history
+      allow delete: if false;
+    }
   }
 }

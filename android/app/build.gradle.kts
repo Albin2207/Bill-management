@@ -35,6 +35,15 @@ android {
         multiDexEnabled = true
     }
 
+    signingConfigs {
+        getByName("debug") {
+            storeFile = file("billing-management-debug.keystore")
+            storePassword = "android"
+            keyAlias = "billing-debug"
+            keyPassword = "android"
+        }
+    }
+
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.

@@ -25,15 +25,9 @@ class DefaultFirebaseOptions {
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return macos;
       case TargetPlatform.windows:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for windows - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return windows;
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
@@ -47,28 +41,53 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyBGMfUtvLNYJeoWU_M8VGeiFs3X0wG2BNY',
-    appId: '1:1029956896999:web:05b380eeb975817543fa42',
-    messagingSenderId: '1029956896999',
-    projectId: 'billing-87872',
-    authDomain: 'billing-87872.firebaseapp.com',
-    storageBucket: 'billing-87872.firebasestorage.app',
+    apiKey: 'AIzaSyCffW1ayDe4TICsjWghGhaEtrfigKoBYjk',
+    appId: '1:557515558673:web:ec6aeb3f70c22a25c7c6b0',
+    messagingSenderId: '557515558673',
+    projectId: 'gst-billing-477306',
+    authDomain: 'gst-billing-477306.firebaseapp.com',
+    storageBucket: 'gst-billing-477306.firebasestorage.app',
+    measurementId: 'G-YVDGQ4N5CV',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDE5MW9zlm7kgJwbz6NvxiNTLP595Yiyck',
-    appId: '1:1029956896999:android:2bbd14e26a6972ac43fa42',
-    messagingSenderId: '1029956896999',
-    projectId: 'billing-87872',
-    storageBucket: 'billing-87872.firebasestorage.app',
+    apiKey: 'AIzaSyClstt2kbBZz6xJFYmELqDUJ2Kq9efgvMU',
+    appId: '1:557515558673:android:57dff98decc0b4a9c7c6b0',
+    messagingSenderId: '557515558673',
+    projectId: 'gst-billing-477306',
+    storageBucket: 'gst-billing-477306.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyDPdfLNwEEIHwlCDk-L-3fFeVWUYjIJSmI',
-    appId: '1:1029956896999:ios:1444143ff5aaf7c943fa42',
-    messagingSenderId: '1029956896999',
-    projectId: 'billing-87872',
-    storageBucket: 'billing-87872.firebasestorage.app',
+    apiKey: 'AIzaSyAZjOw7wPF1_qQAEK9OUh373rPB39tgG4o',
+    appId: '1:557515558673:ios:4dbffcff62b186bbc7c6b0',
+    messagingSenderId: '557515558673',
+    projectId: 'gst-billing-477306',
+    storageBucket: 'gst-billing-477306.firebasestorage.app',
+    androidClientId: '557515558673-6f7i2tnpmgsofm2av1pu1qdkc79ajb2j.apps.googleusercontent.com',
+    iosClientId: '557515558673-b1i93imert50r09f99rfp27agbpegb2s.apps.googleusercontent.com',
     iosBundleId: 'com.example.billingManagement',
   );
+
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyAZjOw7wPF1_qQAEK9OUh373rPB39tgG4o',
+    appId: '1:557515558673:ios:4dbffcff62b186bbc7c6b0',
+    messagingSenderId: '557515558673',
+    projectId: 'gst-billing-477306',
+    storageBucket: 'gst-billing-477306.firebasestorage.app',
+    androidClientId: '557515558673-6f7i2tnpmgsofm2av1pu1qdkc79ajb2j.apps.googleusercontent.com',
+    iosClientId: '557515558673-b1i93imert50r09f99rfp27agbpegb2s.apps.googleusercontent.com',
+    iosBundleId: 'com.example.billingManagement',
+  );
+
+  static const FirebaseOptions windows = FirebaseOptions(
+    apiKey: 'AIzaSyCffW1ayDe4TICsjWghGhaEtrfigKoBYjk',
+    appId: '1:557515558673:web:83a95dfe19d95917c7c6b0',
+    messagingSenderId: '557515558673',
+    projectId: 'gst-billing-477306',
+    authDomain: 'gst-billing-477306.firebaseapp.com',
+    storageBucket: 'gst-billing-477306.firebasestorage.app',
+    measurementId: 'G-4P3C2T9N8H',
+  );
+
 }

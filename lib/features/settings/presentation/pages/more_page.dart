@@ -139,14 +139,6 @@ class MorePage extends StatelessWidget {
               ),
               _buildListTile(
                 context,
-                icon: Icons.description,
-                title: 'Invoice Templates',
-                onTap: () {
-                  Navigator.pushNamed(context, AppRouter.invoiceTemplates);
-                },
-              ),
-              _buildListTile(
-                context,
                 icon: Icons.settings,
                 title: 'Document Settings',
                 onTap: () {
@@ -210,15 +202,6 @@ class MorePage extends StatelessWidget {
               _buildSectionTitle('Settings'),
               _buildListTile(
                 context,
-                icon: Icons.settings,
-                title: 'App Settings',
-                subtitle: 'Theme, Notifications, etc.',
-                onTap: () {
-                  Navigator.pushNamed(context, AppRouter.settings);
-                },
-              ),
-              _buildListTile(
-                context,
                 icon: Icons.backup,
                 title: 'Backup & Restore',
                 onTap: () {
@@ -229,7 +212,10 @@ class MorePage extends StatelessWidget {
                 context,
                 icon: Icons.security,
                 title: 'Privacy & Security',
-                onTap: () {},
+                subtitle: 'Privacy policy & data protection',
+                onTap: () {
+                  Navigator.pushNamed(context, AppRouter.privacyPolicy);
+                },
               ),
               
               const Divider(height: 1),
@@ -238,9 +224,12 @@ class MorePage extends StatelessWidget {
               _buildSectionTitle('Support'),
               _buildListTile(
                 context,
-                icon: Icons.help_outline,
-                title: 'Help & FAQ',
-                onTap: () {},
+                icon: Icons.feedback,
+                title: 'Send Feedback',
+                subtitle: 'Share your thoughts & suggestions',
+                onTap: () {
+                  Navigator.pushNamed(context, AppRouter.feedback);
+                },
               ),
               _buildListTile(
                 context,

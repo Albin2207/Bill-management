@@ -9,6 +9,7 @@ import '../../features/invoice/domain/entities/invoice_entity.dart';
 import '../../features/settings/domain/entities/document_settings_entity.dart';
 import '../../features/business/domain/entities/business_entity.dart';
 import 'pdf_templates.dart';
+import '../utils/upi_qr_generator.dart';
 
 class PDFService {
 
@@ -76,6 +77,10 @@ class PDFService {
             // Signature (if enabled)
             if (settings?.showSignature ?? true)
               _buildSignature(settings, business, baseFontSize),
+            
+            // QR Code (if enabled and UPI ID available)
+            if (settings?.showQRCode ?? false)
+              _buildPaymentQRCode(invoice, settings, business, baseFontSize),
             
             // Custom Footer (if set)
             if (settings?.customFooter != null && settings!.customFooter!.isNotEmpty) ...[
@@ -596,6 +601,121 @@ class PDFService {
     final b = int.parse(hex.substring(4, 6), radix: 16) / 255;
     
     return PdfColor(r, g, b);
+  }
+
+  static pw.Widget _buildPaymentQRCode(
+    InvoiceEntity invoice,
+    DocumentSettingsEntity? settings,
+    BusinessEntity? business,
+    double baseFontSize,
+  ) {
+    // Get UPI ID from business profile or settings
+    final upiId = business?.upiId ?? settings?.upiId;
+    
+    // If no UPI ID, don't show QR code
+    if (upiId == null || upiId.isEmpty) {
+      return pw.SizedBox();
+    }
+
+    // Validate UPI ID format
+    if (!UpiQrGenerator.isValidUpiId(upiId)) {
+      return pw.SizedBox();
+    }
+
+    try {
+      // Generate UPI payment link
+      final businessName = business?.businessName ?? settings?.companyName ?? 'Business';
+      final upiLink = UpiQrGenerator.generateInvoicePaymentLink(
+        upiId: upiId,
+        businessName: businessName,
+        amount: invoice.grandTotal,
+        invoiceNumber: invoice.invoiceNumber,
+      );
+
+      return pw.Container(
+        margin: const pw.EdgeInsets.only(top: 20),
+        padding: const pw.EdgeInsets.all(16),
+        decoration: pw.BoxDecoration(
+          border: pw.Border.all(color: PdfColors.grey300, width: 1),
+          borderRadius: const pw.BorderRadius.all(pw.Radius.circular(8)),
+        ),
+        child: pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            // Left side: QR Code
+            pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.center,
+              children: [
+                pw.BarcodeWidget(
+                  barcode: pw.Barcode.qrCode(),
+                  data: upiLink,
+                  width: 100,
+                  height: 100,
+                ),
+                pw.SizedBox(height: 8),
+                pw.Text(
+                  'Scan to Pay',
+                  style: pw.TextStyle(
+                    fontSize: baseFontSize - 2,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            
+            // Right side: Payment details
+            pw.Expanded(
+              child: pw.Container(
+                padding: const pw.EdgeInsets.only(left: 20),
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Text(
+                      'UPI Payment',
+                      style: pw.TextStyle(
+                        fontSize: baseFontSize,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                    pw.SizedBox(height: 8),
+                    pw.Text(
+                      'UPI ID: $upiId',
+                      style: pw.TextStyle(fontSize: baseFontSize - 2),
+                    ),
+                    pw.SizedBox(height: 4),
+                    pw.Text(
+                      'Amount: Rs. ${invoice.grandTotal.toStringAsFixed(2)}',
+                      style: pw.TextStyle(
+                        fontSize: baseFontSize - 2,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                    pw.SizedBox(height: 4),
+                    pw.Text(
+                      'Ref: ${invoice.invoiceNumber}',
+                      style: pw.TextStyle(fontSize: baseFontSize - 3),
+                    ),
+                    pw.SizedBox(height: 8),
+                    pw.Text(
+                      'Open any UPI app (GPay, PhonePe, Paytm, etc.) and scan to pay',
+                      style: pw.TextStyle(
+                        fontSize: baseFontSize - 3,
+                        color: PdfColors.grey700,
+                        fontStyle: pw.FontStyle.italic,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    } catch (e) {
+      // If QR generation fails, return empty widget
+      return pw.SizedBox();
+    }
   }
 
 }

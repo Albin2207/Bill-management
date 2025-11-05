@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/services/pdf_service.dart';
 import '../../../../core/services/share_service.dart';
+import '../../../../core/utils/upi_qr_generator.dart';
 import '../../domain/entities/invoice_entity.dart';
 import '../providers/invoice_provider.dart';
 import '../widgets/payment_reminder_widget.dart';
@@ -388,6 +390,23 @@ class _InvoiceDetailPageState extends State<InvoiceDetailPage> {
                   onRefresh: _loadPayments,
                 ),
               ),
+            
+            const SizedBox(height: 16),
+            
+            // UPI QR Code Section
+            Consumer2<BusinessProvider, DocumentSettingsProvider>(
+              builder: (context, businessProvider, settingsProvider, _) {
+                final business = businessProvider.business;
+                final settings = settingsProvider.settings;
+                final showQR = settings?.showQRCode ?? false;
+                final upiId = business?.upiId ?? settings?.upiId;
+                
+                if (showQR && upiId != null && upiId.isNotEmpty && UpiQrGenerator.isValidUpiId(upiId)) {
+                  return _buildQRCodeSection(business, settings, upiId);
+                }
+                return const SizedBox.shrink();
+              },
+            ),
             
             const SizedBox(height: 16),
           ],
@@ -980,6 +999,153 @@ class _InvoiceDetailPageState extends State<InvoiceDetailPage> {
         return Colors.orange;
       case PaymentStatus.cancelled:
         return Colors.grey;
+    }
+  }
+
+  Widget _buildQRCodeSection(business, settings, String upiId) {
+    try {
+      final businessName = business?.businessName ?? settings?.companyName ?? 'Business';
+      final upiLink = UpiQrGenerator.generateInvoicePaymentLink(
+        upiId: upiId,
+        businessName: businessName,
+        amount: widget.invoice.grandTotal,
+        invoiceNumber: widget.invoice.invoiceNumber,
+      );
+
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Card(
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      Icons.qr_code_2,
+                      color: AppColors.primary,
+                      size: 24,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Quick Payment via UPI',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Center(
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.grey.shade300),
+                    ),
+                    child: QrImageView(
+                      data: upiLink,
+                      version: QrVersions.auto,
+                      size: 200,
+                      backgroundColor: Colors.white,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'UPI ID:',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          Text(
+                            upiId,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Amount:',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          Text(
+                            'Rs. ${widget.invoice.grandTotal.toStringAsFixed(2)}',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade50,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.info_outline,
+                        color: Colors.blue.shade700,
+                        size: 16,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Scan this QR code with any UPI app (GPay, PhonePe, Paytm, etc.) to pay instantly',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.blue.shade700,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    } catch (e) {
+      return const SizedBox.shrink();
     }
   }
 }

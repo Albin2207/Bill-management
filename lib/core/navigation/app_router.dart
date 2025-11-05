@@ -49,6 +49,8 @@ import '../../features/accounting/presentation/pages/trial_balance_page.dart';
 import '../../features/business/presentation/pages/business_onboarding_page.dart';
 import '../../features/business/presentation/pages/business_details_page.dart';
 import '../../features/business/presentation/pages/business_logo_page.dart';
+import '../../features/settings/presentation/pages/privacy_policy_page.dart';
+import '../../features/settings/presentation/pages/feedback_page.dart';
 
 class AppRouter {
   // Auth Routes
@@ -131,6 +133,10 @@ class AppRouter {
   static const String businessOnboarding = '/business-onboarding';
   static const String businessDetails = '/business-details';
   static const String businessLogo = '/business-logo';
+  
+  // Settings Routes
+  static const String privacyPolicy = '/privacy-policy';
+  static const String feedback = '/feedback';
 
   static Route<dynamic> generateRoute(RouteSettings routeSettings) {
     switch (routeSettings.name) {
@@ -275,6 +281,13 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const BusinessDetailsPage());
       case businessLogo:
         return MaterialPageRoute(builder: (_) => const BusinessLogoPage());
+      
+      // Settings Routes
+      case privacyPolicy:
+        return MaterialPageRoute(builder: (_) => const PrivacyPolicyPage());
+      
+      case feedback:
+        return MaterialPageRoute(builder: (_) => const FeedbackPage());
       
       // Not Found
       default:

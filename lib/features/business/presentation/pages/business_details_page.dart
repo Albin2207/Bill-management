@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/upi_qr_generator.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../providers/business_provider.dart';
 import '../../domain/entities/business_entity.dart';
@@ -229,13 +231,147 @@ class _BusinessDetailsPageState extends State<BusinessDetailsPage> {
                       }).toList(),
                     ),
                   
-                  if (business.upiId != null) ...[
+                  if (business.upiId != null && UpiQrGenerator.isValidUpiId(business.upiId!)) ...[
                     const SizedBox(height: 16),
                     Card(
-                      child: ListTile(
-                        leading: const Icon(Icons.qr_code, color: AppColors.primary),
-                        title: const Text('UPI ID'),
-                        subtitle: Text(business.upiId!),
+                      elevation: 2,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.qr_code_2,
+                                  color: AppColors.primary,
+                                  size: 24,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'UPI Payment Details',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.primary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            Center(
+                              child: Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: Colors.grey.shade300),
+                                ),
+                                child: QrImageView(
+                                  data: UpiQrGenerator.generateStaticPaymentLink(
+                                    upiId: business.upiId!,
+                                    businessName: business.businessName,
+                                  ),
+                                  version: QrVersions.auto,
+                                  size: 180,
+                                  backgroundColor: Colors.white,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: AppColors.primary.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    children: [
+                                      const Expanded(
+                                        child: Text(
+                                          'UPI ID:',
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ),
+                                      Expanded(
+                                        flex: 2,
+                                        child: Text(
+                                          business.upiId!,
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.bold,
+                                            color: AppColors.primary,
+                                          ),
+                                          textAlign: TextAlign.right,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    children: [
+                                      const Expanded(
+                                        child: Text(
+                                          'Business Name:',
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ),
+                                      Expanded(
+                                        flex: 2,
+                                        child: Text(
+                                          business.businessName,
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                          textAlign: TextAlign.right,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.blue.shade50,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.info_outline,
+                                    color: Colors.blue.shade700,
+                                    size: 16,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      'This is a static QR code for general payments. Customer will enter the amount.',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.blue.shade700,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],

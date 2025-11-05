@@ -1,81 +1,45 @@
 {
   "project_info": {
-    "project_number": "1029956896999",
-    "project_id": "billing-87872",
-    "storage_bucket": "billing-87872.firebasestorage.app"
+    "project_number": "557515558673",
+    "project_id": "gst-billing-477306",
+    "storage_bucket": "gst-billing-477306.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1029956896999:android:2bbd14e26a6972ac43fa42",
-        "android_client_info": {
-          "package_name": "com.example.billing_management"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "1029956896999-e8q6d6f9johb3003bvadt45i3kb94u24.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyDE5MW9zlm7kgJwbz6NvxiNTLP595Yiyck"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "1029956896999-e8q6d6f9johb3003bvadt45i3kb94u24.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
-              "client_id": "1029956896999-d8djk7vfgcquj0ckg4kkjcnd6o5f7cqd.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.example.billingManagement"
-              }
-            }
-          ]
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:1029956896999:android:7d978c748d87792343fa42",
+        "mobilesdk_app_id": "1:557515558673:android:57dff98decc0b4a9c7c6b0",
         "android_client_info": {
           "package_name": "com.growblic.billing_management"
         }
       },
       "oauth_client": [
         {
-          "client_id": "1029956896999-srscbhtuhvb7scv70ga1t0ch6p4hfu09.apps.googleusercontent.com",
+          "client_id": "557515558673-6f7i2tnpmgsofm2av1pu1qdkc79ajb2j.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.growblic.billing_management",
-            "certificate_hash": "7c2b7902877125e8b05784210b14d0e532520def"
+            "certificate_hash": "5e6cde0da6accba321c4abb0b87c70a79167228e"
           }
         },
         {
-          "client_id": "1029956896999-e8q6d6f9johb3003bvadt45i3kb94u24.apps.googleusercontent.com",
+          "client_id": "557515558673-ig68opsf16q1h498b4ojrnctquujvdc2.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyDE5MW9zlm7kgJwbz6NvxiNTLP595Yiyck"
+          "current_key": "AIzaSyClstt2kbBZz6xJFYmELqDUJ2Kq9efgvMU"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "1029956896999-e8q6d6f9johb3003bvadt45i3kb94u24.apps.googleusercontent.com",
+              "client_id": "557515558673-ig68opsf16q1h498b4ojrnctquujvdc2.apps.googleusercontent.com",
               "client_type": 3
             },
             {
-              "client_id": "1029956896999-d8djk7vfgcquj0ckg4kkjcnd6o5f7cqd.apps.googleusercontent.com",
+              "client_id": "557515558673-b1i93imert50r09f99rfp27agbpegb2s.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
                 "bundle_id": "com.example.billingManagement"
