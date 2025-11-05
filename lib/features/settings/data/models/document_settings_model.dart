@@ -68,7 +68,7 @@ class DocumentSettingsModel extends DocumentSettingsEntity {
       showBankDetails: json['showBankDetails'] as bool? ?? true,
       showSignature: json['showSignature'] as bool? ?? true,
       showTerms: json['showTerms'] as bool? ?? true,
-      showQRCode: json['showQRCode'] as bool? ?? false,
+      showQRCode: json['showQRCode'] as bool? ?? true,
       customHeader: json['customHeader'] as String?,
       customFooter: json['customFooter'] as String?,
       defaultTerms: json['defaultTerms'] as String?,

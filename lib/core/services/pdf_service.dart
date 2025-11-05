@@ -79,7 +79,7 @@ class PDFService {
               _buildSignature(settings, business, baseFontSize),
             
             // QR Code (if enabled and UPI ID available)
-            if (settings?.showQRCode ?? false)
+            if (settings?.showQRCode ?? true)
               _buildPaymentQRCode(invoice, settings, business, baseFontSize),
             
             // Custom Footer (if set)

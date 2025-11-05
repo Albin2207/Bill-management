@@ -51,22 +51,33 @@ class _SplashPageState extends State<SplashPage> {
       
       // Navigate based on auth status
       if (authProvider.isAuthenticated) {
-        // FORCE reload business for current user (clears old cache)
-        await businessProvider.loadBusiness(authProvider.user!.uid);
-        
-        if (!mounted) return;
-        
-        // Check business belongs to current user AND is complete
-        final currentUserId = authProvider.user!.uid;
-        final hasValidBusiness = businessProvider.business != null &&
-            businessProvider.business!.userId == currentUserId &&
-            businessProvider.hasCompletedOnboarding;
-        
-        if (hasValidBusiness) {
-          // Existing user with complete profile - go to home
-          Navigator.of(context).pushReplacementNamed(AppRouter.home);
-        } else {
-          // New user OR incomplete profile - show business onboarding
+        try {
+          final currentUserId = authProvider.user!.uid;
+          
+          // Clear any old business data first
+          businessProvider.clearBusiness();
+          
+          // Load business for current user
+          await businessProvider.loadBusiness(currentUserId);
+          
+          if (!mounted) return;
+          
+          // Check if business exists, belongs to current user, AND is complete
+          final hasValidBusiness = businessProvider.business != null &&
+              businessProvider.business!.userId == currentUserId &&
+              businessProvider.hasCompletedOnboarding;
+          
+          if (hasValidBusiness) {
+            // Existing user with complete profile - go to home
+            Navigator.of(context).pushReplacementNamed(AppRouter.home);
+          } else {
+            // New user OR incomplete profile - show business onboarding
+            Navigator.of(context).pushReplacementNamed(AppRouter.businessOnboarding);
+          }
+        } catch (e) {
+          debugPrint('Error loading business: $e');
+          // On error, show business onboarding to let user set up
+          if (!mounted) return;
           Navigator.of(context).pushReplacementNamed(AppRouter.businessOnboarding);
         }
       } else {

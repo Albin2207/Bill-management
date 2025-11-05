@@ -92,7 +92,7 @@ class DocumentSettingsEntity extends Equatable {
     this.showBankDetails = true,
     this.showSignature = true,
     this.showTerms = true,
-    this.showQRCode = false,
+    this.showQRCode = true,
     this.customHeader,
     this.customFooter,
     this.defaultTerms,

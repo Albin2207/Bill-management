@@ -398,7 +398,7 @@ class _InvoiceDetailPageState extends State<InvoiceDetailPage> {
               builder: (context, businessProvider, settingsProvider, _) {
                 final business = businessProvider.business;
                 final settings = settingsProvider.settings;
-                final showQR = settings?.showQRCode ?? false;
+                final showQR = settings?.showQRCode ?? true;
                 final upiId = business?.upiId ?? settings?.upiId;
                 
                 if (showQR && upiId != null && upiId.isNotEmpty && UpiQrGenerator.isValidUpiId(upiId)) {

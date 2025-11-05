@@ -45,21 +45,31 @@ class _LoginPageState extends State<LoginPage> {
     if (!mounted) return;
 
     if (success) {
-      // Check if business exists
-      await businessProvider.loadBusiness(authProvider.user!.uid);
-      
-      if (!mounted) return;
-      
-      final currentUserId = authProvider.user!.uid;
-      final hasValidBusiness = businessProvider.business != null &&
-          businessProvider.business!.userId == currentUserId &&
-          businessProvider.hasCompletedOnboarding;
-      
-      if (hasValidBusiness) {
-        // Existing user - go to home
-        Navigator.of(context).pushReplacementNamed(AppRouter.home);
-      } else {
-        // Incomplete/New user - show onboarding
+      try {
+        final currentUserId = authProvider.user!.uid;
+        
+        // Clear any old business data first
+        businessProvider.clearBusiness();
+        
+        // Load business for current user
+        await businessProvider.loadBusiness(currentUserId);
+        
+        if (!mounted) return;
+        
+        final hasValidBusiness = businessProvider.business != null &&
+            businessProvider.business!.userId == currentUserId &&
+            businessProvider.hasCompletedOnboarding;
+        
+        if (hasValidBusiness) {
+          // Existing user - go to home
+          Navigator.of(context).pushReplacementNamed(AppRouter.home);
+        } else {
+          // Incomplete/New user - show onboarding
+          Navigator.of(context).pushReplacementNamed(AppRouter.businessOnboarding);
+        }
+      } catch (e) {
+        // On error, show business onboarding
+        if (!mounted) return;
         Navigator.of(context).pushReplacementNamed(AppRouter.businessOnboarding);
       }
     } else {
@@ -73,37 +83,60 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _handleGoogleSignIn() async {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final businessProvider = Provider.of<BusinessProvider>(context, listen: false);
-    
-    final success = await authProvider.signInWithGoogle();
-
-    if (!mounted) return;
-
-    if (success) {
-      // Check if business exists
-      await businessProvider.loadBusiness(authProvider.user!.uid);
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final businessProvider = Provider.of<BusinessProvider>(context, listen: false);
       
+      // Clear any old business data before signing in
+      businessProvider.clearBusiness();
+      
+      final success = await authProvider.signInWithGoogle();
+
       if (!mounted) return;
-      
-      final currentUserId = authProvider.user!.uid;
-      final hasValidBusiness = businessProvider.business != null &&
-          businessProvider.business!.userId == currentUserId &&
-          businessProvider.hasCompletedOnboarding;
-      
-      if (hasValidBusiness) {
-        // Existing user - go to home
-        Navigator.of(context).pushReplacementNamed(AppRouter.home);
+
+      if (success) {
+        try {
+          final currentUserId = authProvider.user!.uid;
+          
+          // Load business for current user
+          await businessProvider.loadBusiness(currentUserId);
+          
+          if (!mounted) return;
+          
+          final hasValidBusiness = businessProvider.business != null &&
+              businessProvider.business!.userId == currentUserId &&
+              businessProvider.hasCompletedOnboarding;
+          
+          if (hasValidBusiness) {
+            // Existing user - go to home
+            Navigator.of(context).pushReplacementNamed(AppRouter.home);
+          } else {
+            // Incomplete/New user - show onboarding
+            Navigator.of(context).pushReplacementNamed(AppRouter.businessOnboarding);
+          }
+        } catch (e) {
+          debugPrint('Error loading business after sign in: $e');
+          // On error, show business onboarding
+          if (!mounted) return;
+          Navigator.of(context).pushReplacementNamed(AppRouter.businessOnboarding);
+        }
       } else {
-        // Incomplete/New user - show onboarding
-        Navigator.of(context).pushReplacementNamed(AppRouter.businessOnboarding);
+        // Only show error message if it's not a cancellation
+        if (authProvider.errorMessage != null && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(authProvider.errorMessage!),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
       }
-    } else {
-      // Only show error message if it's not a cancellation
-      if (authProvider.errorMessage != null) {
+    } catch (e) {
+      debugPrint('Error in Google Sign-In: $e');
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(authProvider.errorMessage!),
+            content: Text('Failed to sign in: ${e.toString()}'),
             backgroundColor: AppColors.error,
           ),
         );

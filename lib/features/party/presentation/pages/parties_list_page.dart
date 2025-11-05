@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -41,6 +42,16 @@ class _PartiesListPageState extends State<PartiesListPage> {
         title: const Text('Parties'),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.onPrimary,
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [AppColors.primary, AppColors.primaryDark],
+            ),
+          ),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.search),
@@ -59,10 +70,23 @@ class _PartiesListPageState extends State<PartiesListPage> {
           }
         },
         backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        elevation: 4,
         icon: const Icon(Icons.add),
-        label: const Text('Add Party'),
+        label: const Text('Add Party', style: TextStyle(fontWeight: FontWeight.bold)),
       ),
-      body: Consumer<PartyProvider>(
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              AppColors.primary.withOpacity(0.05),
+              Colors.white,
+            ],
+          ),
+        ),
+        child: Consumer<PartyProvider>(
         builder: (context, partyProvider, child) {
           if (partyProvider.isLoading) {
             return const Center(child: CircularProgressIndicator());
@@ -126,9 +150,28 @@ class _PartiesListPageState extends State<PartiesListPage> {
               padding: const EdgeInsets.all(16),
               itemBuilder: (context, index) {
                 final party = parties[index];
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  child: ListTile(
+                return TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0.0, end: 1.0),
+                  duration: Duration(milliseconds: 400 + (index * 50)),
+                  curve: Curves.easeOut,
+                  builder: (context, value, child) {
+                    return Transform.translate(
+                      offset: Offset(30 * (1 - value), 0),
+                      child: Opacity(
+                        opacity: value,
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: Card(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    elevation: 2,
+                    shadowColor: AppColors.primary.withOpacity(0.1),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     leading: CircleAvatar(
                       backgroundColor: _getPartyColor(party.partyType),
                       backgroundImage:
@@ -196,15 +239,17 @@ class _PartiesListPageState extends State<PartiesListPage> {
                         ],
                       ],
                     ),
-                    onTap: () {
-                      _showPartyOptions(context, party);
-                    },
+                      onTap: () {
+                        _showPartyOptions(context, party);
+                      },
+                    ),
                   ),
                 );
               },
             ),
           );
         },
+        ),
       ),
     );
   }

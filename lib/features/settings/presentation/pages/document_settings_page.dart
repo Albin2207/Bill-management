@@ -48,7 +48,7 @@ class _DocumentSettingsPageState extends State<DocumentSettingsPage> with Single
   bool _showBankDetails = true;
   bool _showSignature = true;
   bool _showTerms = true;
-  bool _showQRCode = false;
+  bool _showQRCode = true;
   bool _includeHSN = true;
   bool _includeTax = true;
   bool _roundOff = false;

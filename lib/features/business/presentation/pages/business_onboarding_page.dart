@@ -154,6 +154,7 @@ class _BusinessOnboardingPageState extends State<BusinessOnboardingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -180,9 +181,10 @@ class _BusinessOnboardingPageState extends State<BusinessOnboardingPage> {
                     controller: _pageController,
                     physics: const NeverScrollableScrollPhysics(),
                     onPageChanged: (page) {
-                      // Dismiss keyboard when changing pages
-                      FocusScope.of(context).unfocus();
-                      setState(() => _currentPage = page);
+                      // Only update if page actually changed to prevent unnecessary rebuilds
+                      if (_currentPage != page) {
+                        setState(() => _currentPage = page);
+                      }
                     },
                     children: [
                       _buildWelcomePage(),
@@ -727,11 +729,6 @@ class _BusinessOnboardingPageState extends State<BusinessOnboardingPage> {
   }
 
   Widget _buildCompletePage() {
-    // Dismiss keyboard immediately on this page
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      FocusScope.of(context).unfocus();
-    });
-    
     return SingleChildScrollView(
       padding: const EdgeInsets.all(32),
       child: Column(

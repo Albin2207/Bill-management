@@ -102,9 +102,7 @@ class PrivacyPolicyPage extends StatelessWidget {
               'Contact Us',
               'If you have questions or concerns about this Privacy Policy or '
               'your data, please contact us:\n\n'
-              '📧 Email: support@growblic.com\n'
-              '📱 WhatsApp: +91-XXXXXXXXXX\n'
-              '🌐 Website: www.growblic.com',
+              '📧 Email: thomasalbin35@gmail.com',
             ),
             const SizedBox(height: 16),
             _buildFooter(),
