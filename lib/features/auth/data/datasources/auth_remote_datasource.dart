@@ -10,6 +10,7 @@ abstract class AuthRemoteDataSource {
   });
   
   Future<User> signUpWithEmail({
+    required String displayName,
     required String email,
     required String password,
   });
@@ -60,6 +61,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<User> signUpWithEmail({
+    required String displayName,
     required String email,
     required String password,
   }) async {
@@ -74,7 +76,13 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           code: 'no_user',
         );
       }
-      return userCredential.user!;
+      
+      // Update user profile with display name
+      await userCredential.user!.updateDisplayName(displayName);
+      await userCredential.user!.reload();
+      
+      // Return the updated user
+      return firebaseAuth.currentUser!;
     } on FirebaseAuthException catch (e) {
       throw AuthException(
         e.message ?? 'Registration failed',

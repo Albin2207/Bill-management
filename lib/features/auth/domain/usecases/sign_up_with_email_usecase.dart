@@ -12,6 +12,7 @@ class SignUpWithEmailUsecase implements Usecase<UserEntity, SignUpParams> {
   @override
   Future<Either<Failure, UserEntity>> call(SignUpParams params) async {
     return await repository.signUpWithEmail(
+      displayName: params.displayName,
       email: params.email,
       password: params.password,
     );
@@ -19,10 +20,12 @@ class SignUpWithEmailUsecase implements Usecase<UserEntity, SignUpParams> {
 }
 
 class SignUpParams {
+  final String displayName;
   final String email;
   final String password;
 
   SignUpParams({
+    required this.displayName,
     required this.email,
     required this.password,
   });

@@ -219,18 +219,12 @@ class _DashboardPageState extends State<DashboardPage> {
                 ),
                 title: Row(
                   children: [
-                    // Placeholder for app icon
-                    Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Icon(
-                        Icons.receipt_long,
-                        color: Colors.white,
-                        size: 20,
-                      ),
+                    // App logo icon
+                    Image.asset(
+                      'assets/billing-management-logo.png',
+                      width: 32,
+                      height: 32,
+                      fit: BoxFit.contain,
                     ),
                     const SizedBox(width: 12),
                     const Text(
@@ -243,12 +237,6 @@ class _DashboardPageState extends State<DashboardPage> {
                   ],
                 ),
               ),
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.notifications_outlined),
-                  onPressed: () {},
-                ),
-              ],
             ),
             
             SliverToBoxAdapter(
@@ -700,22 +688,6 @@ class _DashboardPageState extends State<DashboardPage> {
               mainAxisSpacing: 12,
               childAspectRatio: 1.8,
               children: [
-                QuickActionCard(
-                  title: 'E-Way Bill',
-                  icon: Icons.description,
-                  color: Colors.blue,
-                  onTap: () {
-                    Navigator.pushNamed(context, AppRouter.eWayBill);
-                  },
-                ),
-                QuickActionCard(
-                  title: 'E-Invoice',
-                  icon: Icons.receipt_long,
-                  color: Colors.green,
-                  onTap: () {
-                    Navigator.pushNamed(context, AppRouter.eInvoice);
-                  },
-                ),
                 QuickActionCard(
                   title: 'Payments',
                   icon: Icons.payment,

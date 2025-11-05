@@ -124,26 +124,11 @@ class _SplashPageState extends State<SplashPage> {
                   builder: (context, value, child) {
                     return Transform.scale(
                       scale: value,
-                      child: Container(
-                        width: 120,
-                        height: 120,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(30),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
-                              blurRadius: 20,
-                              offset: const Offset(0, 10),
-                            ),
-                          ],
-                        ),
-                        child: Icon(
-                          Icons.receipt_long,
-                          size: 60,
-                          color: AppColors.onPrimary,
-                        ),
-                        // TODO: Replace with: Image.asset('assets/images/logo.png')
+                      child: Image.asset(
+                        'assets/billing-management-logo.png',
+                        width: 140,
+                        height: 140,
+                        fit: BoxFit.contain,
                       ),
                     );
                   },
@@ -185,7 +170,7 @@ class _SplashPageState extends State<SplashPage> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'GST Management Made Easy',
+                        'Smart Business Management',
                         style: TextStyle(
                           fontSize: 16,
                           color: AppColors.onPrimary.withOpacity(0.9),

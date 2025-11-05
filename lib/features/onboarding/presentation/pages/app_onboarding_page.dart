@@ -19,7 +19,7 @@ class _AppOnboardingPageState extends State<AppOnboardingPage> {
   final List<OnboardingContent> _pages = [
     OnboardingContent(
       title: 'Manage Your Business',
-      description: 'Complete GST billing solution with 11 document types. Create invoices, track payments, and manage inventory all in one place.',
+      description: 'Complete billing solution with 11 document types. Create invoices, track payments, and manage inventory all in one place.',
       animationAsset: 'assets/images/invoice-maker.png',
       isImage: true,
     ),

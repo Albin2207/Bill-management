@@ -23,7 +23,7 @@ class PrivacyPolicyPage extends StatelessWidget {
               'Information We Collect',
               'We collect information you provide directly to us when you:\n'
               '• Create an account\n'
-              '• Use our billing and GST management features\n'
+              '• Use our billing and management features\n'
               '• Upload business documents and logos\n'
               '• Contact our support team\n\n'
               'This includes your business details, GSTIN, contact information, '

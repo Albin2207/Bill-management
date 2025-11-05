@@ -233,15 +233,6 @@ class _BillsPageState extends State<BillsPage> with SingleTickerProviderStateMix
           onTap: () => Navigator.pushNamed(context, AppRouter.createIndirectIncome),
         ),
         const SizedBox(height: 24),
-        const Text(
-          'Recent Documents',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 12),
-        _buildEmptyState('No other documents yet'),
       ],
     );
   }

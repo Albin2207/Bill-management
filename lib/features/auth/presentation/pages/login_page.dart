@@ -179,33 +179,11 @@ class _LoginPageState extends State<LoginPage> {
                         scale: 0.8 + (0.2 * value),
                         child: Opacity(
                           opacity: value,
-                          child: Container(
+                          child: Image.asset(
+                            'assets/billing-management-logo.png',
                             width: 100,
                             height: 100,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  AppColors.primary,
-                                  AppColors.primaryDark,
-                                ],
-                              ),
-                              borderRadius: BorderRadius.circular(24),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppColors.primary.withOpacity(0.3),
-                                  blurRadius: 20,
-                                  offset: const Offset(0, 10),
-                                ),
-                              ],
-                            ),
-                            child: Icon(
-                              Icons.receipt_long,
-                              size: 50,
-                              color: AppColors.onPrimary,
-                            ),
-                            // TODO: Replace with: Image.asset('assets/images/logo.png')
+                            fit: BoxFit.contain,
                           ),
                         ),
                       );

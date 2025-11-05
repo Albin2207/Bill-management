@@ -37,14 +37,24 @@ class _InvoicesListPageState extends State<InvoicesListPage> {
   }
   
   List<InvoiceEntity> _getFilteredInvoices(List<InvoiceEntity> invoices) {
-    if (_selectedFilter == null) return invoices;
-    return invoices.where((i) => i.paymentStatus == _selectedFilter).toList();
+    // Filter to show only invoices (not bills, quotations, etc.)
+    var filtered = invoices.where((i) => i.invoiceType == InvoiceType.invoice).toList();
+    
+    // Apply payment status filter if selected
+    if (_selectedFilter != null) {
+      filtered = filtered.where((i) => i.paymentStatus == _selectedFilter).toList();
+    }
+    
+    return filtered;
   }
 
   @override
   Widget build(BuildContext context) {
     final invoiceProvider = Provider.of<InvoiceProvider>(context);
     final filteredInvoices = _getFilteredInvoices(invoiceProvider.invoices);
+    
+    // Get only invoices for counting
+    final onlyInvoices = invoiceProvider.invoices.where((i) => i.invoiceType == InvoiceType.invoice).toList();
     
     return Scaffold(
       appBar: AppBar(
@@ -70,30 +80,30 @@ class _InvoicesListPageState extends State<InvoicesListPage> {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  _buildFilterChip('All', null, invoiceProvider.invoices.length),
+                  _buildFilterChip('All', null, onlyInvoices.length),
                   const SizedBox(width: 8),
                   _buildFilterChip(
                     'Paid',
                     PaymentStatus.paid,
-                    invoiceProvider.invoices.where((i) => i.paymentStatus == PaymentStatus.paid).length,
+                    onlyInvoices.where((i) => i.paymentStatus == PaymentStatus.paid).length,
                   ),
                   const SizedBox(width: 8),
                   _buildFilterChip(
                     'Pending',
                     PaymentStatus.pending,
-                    invoiceProvider.invoices.where((i) => i.paymentStatus == PaymentStatus.pending).length,
+                    onlyInvoices.where((i) => i.paymentStatus == PaymentStatus.pending).length,
                   ),
                   const SizedBox(width: 8),
                   _buildFilterChip(
                     'Unpaid',
                     PaymentStatus.unpaid,
-                    invoiceProvider.invoices.where((i) => i.paymentStatus == PaymentStatus.unpaid).length,
+                    onlyInvoices.where((i) => i.paymentStatus == PaymentStatus.unpaid).length,
                   ),
                   const SizedBox(width: 8),
                   _buildFilterChip(
                     'Cancelled',
                     PaymentStatus.cancelled,
-                    invoiceProvider.invoices.where((i) => i.paymentStatus == PaymentStatus.cancelled).length,
+                    onlyInvoices.where((i) => i.paymentStatus == PaymentStatus.cancelled).length,
                   ),
                 ],
               ),

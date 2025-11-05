@@ -1,9 +1,9 @@
 class AppStrings {
   // App Info
-  static const String appName = 'GST Management';
+  static const String appName = 'Billing Management';
   
   // Splash
-  static const String splashWelcome = 'Welcome to GST Management';
+  static const String splashWelcome = 'Welcome to Billing Management';
   
   // Auth
   static const String login = 'Login';

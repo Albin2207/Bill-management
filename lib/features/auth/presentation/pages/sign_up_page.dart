@@ -18,6 +18,7 @@ class SignUpPage extends StatefulWidget {
 
 class _SignUpPageState extends State<SignUpPage> {
   final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
@@ -26,6 +27,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
   @override
   void dispose() {
+    _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
@@ -41,6 +43,7 @@ class _SignUpPageState extends State<SignUpPage> {
     final businessProvider = Provider.of<BusinessProvider>(context, listen: false);
     
     final success = await authProvider.signUpWithEmail(
+      _nameController.text.trim(),
       _emailController.text.trim(),
       _passwordController.text,
     );
@@ -139,33 +142,11 @@ class _SignUpPageState extends State<SignUpPage> {
                         scale: 0.8 + (0.2 * value),
                         child: Opacity(
                           opacity: value,
-                          child: Container(
+                          child: Image.asset(
+                            'assets/billing-management-logo.png',
                             width: 100,
                             height: 100,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  AppColors.primary,
-                                  AppColors.primaryDark,
-                                ],
-                              ),
-                              borderRadius: BorderRadius.circular(24),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppColors.primary.withOpacity(0.3),
-                                  blurRadius: 20,
-                                  offset: const Offset(0, 10),
-                                ),
-                              ],
-                            ),
-                            child: Icon(
-                              Icons.receipt_long,
-                              size: 50,
-                              color: AppColors.onPrimary,
-                            ),
-                            // TODO: Replace with: Image.asset('assets/images/logo.png')
+                            fit: BoxFit.contain,
                           ),
                         ),
                       );
@@ -216,6 +197,22 @@ class _SignUpPageState extends State<SignUpPage> {
                   
                   const SizedBox(height: 48),
                   
+                  AuthTextField(
+                  controller: _nameController,
+                  label: 'Full Name',
+                  keyboardType: TextInputType.name,
+                  prefixIcon: Icons.person_outline,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your name';
+                    }
+                    if (value.length < 2) {
+                      return 'Name must be at least 2 characters';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
                   AuthTextField(
                   controller: _emailController,
                   label: AppStrings.email,

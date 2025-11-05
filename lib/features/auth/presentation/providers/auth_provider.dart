@@ -95,13 +95,13 @@ class AuthProvider with ChangeNotifier {
     );
   }
 
-  Future<bool> signUpWithEmail(String email, String password) async {
+  Future<bool> signUpWithEmail(String displayName, String email, String password) async {
     _status = AuthStatus.loading;
     _errorMessage = null;
     notifyListeners();
 
     final result = await signUpWithEmailUsecase(
-      SignUpParams(email: email, password: password),
+      SignUpParams(displayName: displayName, email: email, password: password),
     );
 
     return result.fold(

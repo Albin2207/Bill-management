@@ -169,30 +169,6 @@ class MorePage extends StatelessWidget {
               _buildSectionTitle('Documents'),
               _buildListTile(
                 context,
-                icon: Icons.description,
-                title: 'E-Way Bill',
-                onTap: () {
-                  Navigator.pushNamed(context, AppRouter.eWayBill);
-                },
-              ),
-              _buildListTile(
-                context,
-                icon: Icons.receipt_long,
-                title: 'E-Invoice',
-                onTap: () {
-                  Navigator.pushNamed(context, AppRouter.eInvoice);
-                },
-              ),
-              _buildListTile(
-                context,
-                icon: Icons.payment,
-                title: 'Payments Timeline',
-                onTap: () {
-                  Navigator.pushNamed(context, AppRouter.paymentsTimeline);
-                },
-              ),
-              _buildListTile(
-                context,
                 icon: Icons.assessment,
                 title: 'Reports',
                 onTap: () {
@@ -472,13 +448,11 @@ class MorePage extends StatelessWidget {
       builder: (context) => AlertDialog(
         title: Row(
           children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(Icons.receipt_long, color: AppColors.primary, size: 28),
+            Image.asset(
+              'assets/billing-management-logo.png',
+              width: 36,
+              height: 36,
+              fit: BoxFit.contain,
             ),
             const SizedBox(width: 12),
             const Text('About'),
@@ -498,7 +472,7 @@ class MorePage extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             const Text(
-              'A comprehensive GST billing and business management solution designed to simplify invoicing, inventory management, and financial tracking for small and medium businesses.',
+              'A comprehensive billing and business management solution designed to simplify invoicing, inventory management, and financial tracking for small and medium businesses.',
               style: TextStyle(fontSize: 14, height: 1.5),
             ),
             const SizedBox(height: 16),
