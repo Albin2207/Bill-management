@@ -358,6 +358,7 @@ class _CreateDeliveryChallanPageState extends State<CreateDeliveryChallanPage> {
                 InvoiceItemsWidget(
                   items: _items,
                   products: productProvider.products,
+                  invoiceType: InvoiceType.deliveryChalan, // Delivery Challan
                   onItemsChanged: (items) {
                     setState(() {
                       _items = items;

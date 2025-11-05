@@ -365,6 +365,7 @@ class _CreateProFormaPageState extends State<CreateProFormaPage> {
                   InvoiceItemsWidget(
                     items: _items,
                     products: productProvider.products,
+                    invoiceType: InvoiceType.proFormaInvoice, // Pro Forma Invoice
                     onItemsChanged: (items) {
                       setState(() {
                         _items = items;

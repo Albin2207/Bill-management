@@ -417,6 +417,7 @@ class _CreateCreditNotePageState extends State<CreateCreditNotePage> {
                   InvoiceItemsWidget(
                     items: _items,
                     products: productProvider.products,
+                    invoiceType: InvoiceType.creditNote, // Credit Note
                     onItemsChanged: (items) {
                       setState(() {
                         _items = items;

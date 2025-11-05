@@ -487,6 +487,7 @@ class _CreatePurchasePageState extends State<CreatePurchasePage> {
                   InvoiceItemsWidget(
                     items: _items,
                     products: productProvider.products,
+                    invoiceType: InvoiceType.bill, // Purchase Bill
                     onItemsChanged: (items) {
                       setState(() {
                         _items = items;

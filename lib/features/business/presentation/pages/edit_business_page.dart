@@ -35,6 +35,7 @@ class _EditBusinessPageState extends State<EditBusinessPage> {
   late TextEditingController _paymentTermsController;
   
   late BusinessType _selectedBusinessType;
+  late List<BankAccount> _bankAccounts;
 
   @override
   void initState() {
@@ -54,6 +55,7 @@ class _EditBusinessPageState extends State<EditBusinessPage> {
     _termsController = TextEditingController(text: widget.business.termsAndConditions);
     _paymentTermsController = TextEditingController(text: widget.business.paymentTerms);
     _selectedBusinessType = widget.business.businessType;
+    _bankAccounts = List.from(widget.business.bankAccounts);
   }
 
   @override
@@ -75,6 +77,178 @@ class _EditBusinessPageState extends State<EditBusinessPage> {
     super.dispose();
   }
 
+  Future<void> _addBankAccount() async {
+    await _showBankAccountDialog();
+  }
+
+  Future<void> _editBankAccount(int index) async {
+    await _showBankAccountDialog(existingBank: _bankAccounts[index], index: index);
+  }
+
+  void _deleteBankAccount(int index) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Bank Account'),
+        content: const Text('Are you sure you want to delete this bank account?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              setState(() {
+                _bankAccounts.removeAt(index);
+                // If deleted primary, make first bank primary
+                if (_bankAccounts.isNotEmpty && !_bankAccounts.any((b) => b.isPrimary)) {
+                  _bankAccounts[0] = _bankAccounts[0].copyWith(isPrimary: true);
+                }
+              });
+              Navigator.pop(context);
+            },
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showBankAccountDialog({BankAccount? existingBank, int? index}) async {
+    final bankNameController = TextEditingController(text: existingBank?.bankName);
+    final accountHolderController = TextEditingController(text: existingBank?.accountHolderName);
+    final accountNumberController = TextEditingController(text: existingBank?.accountNumber);
+    final ifscController = TextEditingController(text: existingBank?.ifscCode);
+    final branchController = TextEditingController(text: existingBank?.branchName);
+    bool isPrimary = existingBank?.isPrimary ?? _bankAccounts.isEmpty;
+
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(existingBank == null ? 'Add Bank Account' : 'Edit Bank Account'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: bankNameController,
+                decoration: const InputDecoration(
+                  labelText: 'Bank Name *',
+                  hintText: 'State Bank of India',
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: accountHolderController,
+                decoration: const InputDecoration(
+                  labelText: 'Account Holder Name *',
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: accountNumberController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Account Number *',
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: ifscController,
+                textCapitalization: TextCapitalization.characters,
+                maxLength: 11,
+                decoration: const InputDecoration(
+                  labelText: 'IFSC Code *',
+                  hintText: 'SBIN0001234',
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: branchController,
+                decoration: const InputDecoration(
+                  labelText: 'Branch Name (Optional)',
+                ),
+              ),
+              const SizedBox(height: 16),
+              StatefulBuilder(
+                builder: (context, setDialogState) {
+                  return CheckboxListTile(
+                    title: const Text('Set as Primary Account'),
+                    value: isPrimary,
+                    onChanged: (value) {
+                      setDialogState(() {
+                        isPrimary = value ?? false;
+                      });
+                    },
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (bankNameController.text.isNotEmpty &&
+                  accountHolderController.text.isNotEmpty &&
+                  accountNumberController.text.isNotEmpty &&
+                  ifscController.text.isNotEmpty) {
+                final newBank = BankAccount(
+                  bankName: bankNameController.text,
+                  accountHolderName: accountHolderController.text,
+                  accountNumber: accountNumberController.text,
+                  ifscCode: ifscController.text,
+                  branchName: branchController.text.isEmpty ? null : branchController.text,
+                  isPrimary: isPrimary,
+                );
+
+                setState(() {
+                  if (index != null) {
+                    // Edit existing
+                    _bankAccounts[index] = newBank;
+                  } else {
+                    // Add new
+                    _bankAccounts.add(newBank);
+                  }
+
+                  // If this is set as primary, update others
+                  if (isPrimary) {
+                    for (var i = 0; i < _bankAccounts.length; i++) {
+                      if (i != (index ?? _bankAccounts.length - 1)) {
+                        _bankAccounts[i] = _bankAccounts[i].copyWith(isPrimary: false);
+                      }
+                    }
+                  }
+                });
+
+                Navigator.pop(context);
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Please fill all required fields')),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+            ),
+            child: Text(existingBank == null ? 'Add' : 'Update'),
+          ),
+        ],
+      ),
+    );
+
+    bankNameController.dispose();
+    accountHolderController.dispose();
+    accountNumberController.dispose();
+    ifscController.dispose();
+    branchController.dispose();
+  }
+
   Future<void> _saveChanges() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -93,6 +267,7 @@ class _EditBusinessPageState extends State<EditBusinessPage> {
       city: _cityController.text.isEmpty ? null : _cityController.text,
       state: _stateController.text.isEmpty ? null : _stateController.text,
       pincode: _pincodeController.text.isEmpty ? null : _pincodeController.text,
+      bankAccounts: _bankAccounts,
       upiId: _upiIdController.text.isEmpty ? null : _upiIdController.text,
       termsAndConditions: _termsController.text.isEmpty ? null : _termsController.text,
       paymentTerms: _paymentTermsController.text.isEmpty ? null : _paymentTermsController.text,
@@ -282,6 +457,85 @@ class _EditBusinessPageState extends State<EditBusinessPage> {
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 ),
               ),
+              const SizedBox(height: 24),
+
+              // Bank Accounts
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Bank Accounts', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  OutlinedButton.icon(
+                    onPressed: _addBankAccount,
+                    icon: const Icon(Icons.add, size: 18),
+                    label: const Text('Add'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.primary,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              if (_bankAccounts.isEmpty)
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: Center(
+                    child: Text(
+                      'No bank accounts added',
+                      style: TextStyle(color: Colors.grey.shade600),
+                    ),
+                  ),
+                )
+              else
+                ..._bankAccounts.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final bank = entry.value;
+                  return Card(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    child: ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: AppColors.primary.withOpacity(0.1),
+                        child: const Icon(Icons.account_balance, color: AppColors.primary, size: 20),
+                      ),
+                      title: Text(bank.bankName, style: const TextStyle(fontWeight: FontWeight.w600)),
+                      subtitle: Text('${bank.accountHolderName}\n****${bank.accountNumber.substring(bank.accountNumber.length - 4)}'),
+                      isThreeLine: true,
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (bank.isPrimary)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: Colors.green.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: const Text(
+                                'PRIMARY',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.green,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          IconButton(
+                            icon: const Icon(Icons.edit, size: 20),
+                            onPressed: () => _editBankAccount(index),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete, size: 20, color: Colors.red),
+                            onPressed: () => _deleteBankAccount(index),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }).toList(),
               const SizedBox(height: 24),
 
               // UPI

@@ -248,14 +248,6 @@ class MorePage extends StatelessWidget {
               _buildSectionTitle('Settings'),
               _buildListTile(
                 context,
-                icon: Icons.backup,
-                title: 'Backup & Restore',
-                onTap: () {
-                  Navigator.pushNamed(context, AppRouter.backupRestore);
-                },
-              ),
-              _buildListTile(
-                context,
                 icon: Icons.security,
                 title: 'Privacy & Security',
                 subtitle: 'Privacy policy & data protection',

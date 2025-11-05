@@ -524,6 +524,7 @@ class _CreateDebitNotePageState extends State<CreateDebitNotePage> {
                   InvoiceItemsWidget(
                     items: _items,
                     products: productProvider.products,
+                    invoiceType: InvoiceType.debitNote, // Debit Note
                     onItemsChanged: (items) {
                       setState(() {
                         _items = items;

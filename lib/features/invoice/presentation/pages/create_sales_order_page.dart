@@ -366,6 +366,7 @@ class _CreateSalesOrderPageState extends State<CreateSalesOrderPage> {
                   InvoiceItemsWidget(
                     items: _items,
                     products: productProvider.products,
+                    invoiceType: InvoiceType.salesOrder, // Sales Order
                     onItemsChanged: (items) {
                       setState(() {
                         _items = items;

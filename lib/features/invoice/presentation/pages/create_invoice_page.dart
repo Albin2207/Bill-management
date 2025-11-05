@@ -354,16 +354,17 @@ class _CreateInvoicePageState extends State<CreateInvoicePage> {
                 ),
                 const SizedBox(height: 16),
                 
-                // Invoice Items
-                InvoiceItemsWidget(
-                  items: _items,
-                  products: productProvider.products,
-                  onItemsChanged: (items) {
-                    setState(() {
-                      _items = items;
-                    });
-                  },
-                  onAddNewProduct: () async {
+                  // Invoice Items
+                  InvoiceItemsWidget(
+                    items: _items,
+                    products: productProvider.products,
+                    invoiceType: InvoiceType.invoice, // Sales Invoice
+                    onItemsChanged: (items) {
+                      setState(() {
+                        _items = items;
+                      });
+                    },
+                    onAddNewProduct: () async {
                     final result = await Navigator.pushNamed(context, AppRouter.addProduct);
                     // Reload products after adding new one
                     if (result == true && mounted) {

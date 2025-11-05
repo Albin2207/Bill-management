@@ -26,6 +26,24 @@ class BankAccount extends Equatable {
     this.isPrimary = false,
   });
 
+  BankAccount copyWith({
+    String? bankName,
+    String? accountNumber,
+    String? ifscCode,
+    String? accountHolderName,
+    String? branchName,
+    bool? isPrimary,
+  }) {
+    return BankAccount(
+      bankName: bankName ?? this.bankName,
+      accountNumber: accountNumber ?? this.accountNumber,
+      ifscCode: ifscCode ?? this.ifscCode,
+      accountHolderName: accountHolderName ?? this.accountHolderName,
+      branchName: branchName ?? this.branchName,
+      isPrimary: isPrimary ?? this.isPrimary,
+    );
+  }
+
   @override
   List<Object?> get props => [
         bankName,

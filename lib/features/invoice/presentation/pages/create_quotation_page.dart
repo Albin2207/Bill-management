@@ -379,6 +379,7 @@ class _CreateQuotationPageState extends State<CreateQuotationPage> {
                   InvoiceItemsWidget(
                     items: _items,
                     products: productProvider.products,
+                    invoiceType: InvoiceType.quotation, // Quotation
                     onItemsChanged: (items) {
                       setState(() {
                         _items = items;

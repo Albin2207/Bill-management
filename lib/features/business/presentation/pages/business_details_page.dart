@@ -196,72 +196,105 @@ class _BusinessDetailsPageState extends State<BusinessDetailsPage> {
                   const SizedBox(height: 16),
 
                   // Bank Accounts
-                  if (business.bankAccounts.isNotEmpty)
-                    _buildSectionCard(
-                      'Bank Accounts',
-                      Icons.account_balance,
-                      business.bankAccounts.map((bank) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildDetailRow('Bank', bank.bankName),
-                            _buildDetailRow('Account Holder', bank.accountHolderName),
-                            _buildDetailRow('Account Number', '****${bank.accountNumber.substring(bank.accountNumber.length - 4)}'),
-                            _buildDetailRow('IFSC', bank.ifscCode),
-                            if (bank.branchName != null) _buildDetailRow('Branch', bank.branchName!),
-                            if (bank.isPrimary)
-                              Container(
-                                margin: const EdgeInsets.only(top: 8),
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: Colors.green.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: const Text(
-                                  'PRIMARY',
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    color: Colors.green,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                  _buildSectionCard(
+                    'Bank Accounts',
+                    Icons.account_balance,
+                    business.bankAccounts.isEmpty
+                        ? [
+                            Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      'No bank accounts added',
+                                      style: TextStyle(color: Colors.grey.shade600),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    OutlinedButton.icon(
+                                      onPressed: () async {
+                                        await Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => EditBusinessPage(business: business),
+                                          ),
+                                        );
+                                        _loadBusiness();
+                                      },
+                                      icon: const Icon(Icons.add, size: 18),
+                                      label: const Text('Add Bank Account'),
+                                      style: OutlinedButton.styleFrom(
+                                        foregroundColor: AppColors.primary,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                          ],
-                        );
-                      }).toList(),
-                    ),
-                  
-                  if (business.upiId != null && UpiQrGenerator.isValidUpiId(business.upiId!)) ...[
-                    const SizedBox(height: 16),
-                    Card(
-                      elevation: 2,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.qr_code_2,
-                                  color: AppColors.primary,
-                                  size: 24,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  'UPI Payment Details',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.primary,
-                                  ),
-                                ),
-                              ],
                             ),
-                            const SizedBox(height: 16),
+                          ]
+                        : business.bankAccounts.map((bank) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildDetailRow('Bank', bank.bankName),
+                                _buildDetailRow('Account Holder', bank.accountHolderName),
+                                _buildDetailRow('Account Number', '****${bank.accountNumber.substring(bank.accountNumber.length - 4)}'),
+                                _buildDetailRow('IFSC', bank.ifscCode),
+                                if (bank.branchName != null) _buildDetailRow('Branch', bank.branchName!),
+                                if (bank.isPrimary)
+                                  Container(
+                                    margin: const EdgeInsets.only(top: 8),
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: Colors.green.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: const Text(
+                                      'PRIMARY',
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        color: Colors.green,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            );
+                          }).toList(),
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // UPI Payment Details
+                  Card(
+                    elevation: 2,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.qr_code_2,
+                                color: AppColors.primary,
+                                size: 24,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'UPI Payment Details',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const Divider(height: 24),
+                          if (business.upiId != null && UpiQrGenerator.isValidUpiId(business.upiId!)) ...[
                             Center(
                               child: Container(
                                 padding: const EdgeInsets.all(16),
@@ -370,26 +403,88 @@ class _BusinessDetailsPageState extends State<BusinessDetailsPage> {
                                 ],
                               ),
                             ),
+                          ] else ...[
+                            Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      'No UPI ID added',
+                                      style: TextStyle(color: Colors.grey.shade600),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    OutlinedButton.icon(
+                                      onPressed: () async {
+                                        await Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => EditBusinessPage(business: business),
+                                          ),
+                                        );
+                                        _loadBusiness();
+                                      },
+                                      icon: const Icon(Icons.add, size: 18),
+                                      label: const Text('Add UPI ID'),
+                                      style: OutlinedButton.styleFrom(
+                                        foregroundColor: AppColors.primary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
                           ],
-                        ),
+                        ],
                       ),
                     ),
-                  ],
+                  ),
+                  const SizedBox(height: 16),
 
                   // Terms & Conditions
-                  if (business.termsAndConditions != null || business.paymentTerms != null) ...[
-                    const SizedBox(height: 16),
-                    _buildSectionCard(
-                      'Terms & Conditions',
-                      Icons.description,
-                      [
-                        if (business.paymentTerms != null)
-                          _buildDetailRow('Payment Terms', business.paymentTerms!),
-                        if (business.termsAndConditions != null)
-                          _buildDetailRow('Terms', business.termsAndConditions!),
-                      ],
-                    ),
-                  ],
+                  _buildSectionCard(
+                    'Terms & Conditions',
+                    Icons.description,
+                    (business.termsAndConditions != null || business.paymentTerms != null)
+                        ? [
+                            if (business.paymentTerms != null)
+                              _buildDetailRow('Payment Terms', business.paymentTerms!),
+                            if (business.termsAndConditions != null)
+                              _buildDetailRow('Terms', business.termsAndConditions!),
+                          ]
+                        : [
+                            Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      'No terms & conditions added',
+                                      style: TextStyle(color: Colors.grey.shade600),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    OutlinedButton.icon(
+                                      onPressed: () async {
+                                        await Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => EditBusinessPage(business: business),
+                                          ),
+                                        );
+                                        _loadBusiness();
+                                      },
+                                      icon: const Icon(Icons.add, size: 18),
+                                      label: const Text('Add Terms'),
+                                      style: OutlinedButton.styleFrom(
+                                        foregroundColor: AppColors.primary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                  ),
                 ],
               ),
             ),

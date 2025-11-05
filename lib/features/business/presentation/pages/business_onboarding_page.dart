@@ -87,6 +87,85 @@ class _BusinessOnboardingPageState extends State<BusinessOnboardingPage> {
     }
   }
 
+  Future<void> _skipOnboarding() async {
+    // Show confirmation dialog
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Skip Setup?'),
+        content: const Text(
+          'You can complete your business profile later from the Business Details page in Settings.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+            ),
+            child: const Text('Skip'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      // Create minimal business profile with only required fields
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final businessProvider = Provider.of<BusinessProvider>(context, listen: false);
+
+      // Use default/placeholder values for required fields if not filled
+      final business = BusinessEntity(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        userId: authProvider.user!.uid,
+        businessName: _businessNameController.text.isNotEmpty
+            ? _businessNameController.text
+            : 'My Business',
+        tradeName: _tradeNameController.text.isEmpty ? null : _tradeNameController.text,
+        businessType: _selectedBusinessType,
+        gstin: _gstinController.text.isNotEmpty
+            ? _gstinController.text
+            : 'PENDING',
+        pan: _panController.text.isEmpty ? null : _panController.text,
+        tan: null,
+        phone: _phoneController.text.isNotEmpty
+            ? _phoneController.text
+            : '0000000000',
+        email: _emailController.text.isEmpty ? null : _emailController.text,
+        website: null,
+        address: _addressController.text.isNotEmpty
+            ? _addressController.text
+            : 'Address to be added',
+        city: _cityController.text.isEmpty ? null : _cityController.text,
+        state: _stateController.text.isEmpty ? null : _stateController.text,
+        pincode: null,
+        country: 'India',
+        bankAccounts: [],
+        upiId: null,
+        termsAndConditions: null,
+        paymentTerms: null,
+        isOnboardingComplete: true,
+        createdAt: DateTime.now(),
+      );
+
+      final success = await businessProvider.saveBusiness(business);
+
+      if (success && mounted) {
+        Navigator.pushReplacementNamed(context, '/home');
+      } else if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(businessProvider.errorMessage ?? 'Failed to save business'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   Future<void> _completOnboarding() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -233,13 +312,28 @@ class _BusinessOnboardingPageState extends State<BusinessOnboardingPage> {
                   color: AppColors.primary,
                 ),
               ),
-              Text(
-                '${(((_currentPage + 1) / 6) * 100).toInt()}%',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primary,
-                ),
+              Row(
+                children: [
+                  Text(
+                    '${(((_currentPage + 1) / 6) * 100).toInt()}%',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                  if (_currentPage > 0 && _currentPage < 5) ...[
+                    const SizedBox(width: 12),
+                    TextButton(
+                      onPressed: _skipOnboarding,
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.grey.shade700,
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      ),
+                      child: const Text('Skip', style: TextStyle(fontSize: 13)),
+                    ),
+                  ],
+                ],
               ),
             ],
           ),
@@ -350,6 +444,30 @@ class _BusinessOnboardingPageState extends State<BusinessOnboardingPage> {
                             color: Colors.blue.shade700,
                             fontWeight: FontWeight.w600,
                             fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.shade50,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.orange.shade200),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.info_outline, color: Colors.orange.shade700, size: 18),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            'You can skip and add details later from Business Details page',
+                            style: TextStyle(
+                              color: Colors.orange.shade700,
+                              fontSize: 13,
+                            ),
                           ),
                         ),
                       ],

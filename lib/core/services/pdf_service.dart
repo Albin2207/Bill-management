@@ -612,13 +612,21 @@ class PDFService {
     // Get UPI ID from business profile or settings
     final upiId = business?.upiId ?? settings?.upiId;
     
+    // Debug print
+    print('🔍 PDF QR Code Debug:');
+    print('  UPI ID: $upiId');
+    print('  Business: ${business?.businessName}');
+    print('  Show QR Setting: ${settings?.showQRCode}');
+    
     // If no UPI ID, don't show QR code
     if (upiId == null || upiId.isEmpty) {
+      print('  ❌ No UPI ID found');
       return pw.SizedBox();
     }
 
     // Validate UPI ID format
     if (!UpiQrGenerator.isValidUpiId(upiId)) {
+      print('  ❌ Invalid UPI ID format');
       return pw.SizedBox();
     }
 
@@ -631,6 +639,8 @@ class PDFService {
         amount: invoice.grandTotal,
         invoiceNumber: invoice.invoiceNumber,
       );
+
+      print('  ✅ UPI Link generated: $upiLink');
 
       return pw.Container(
         margin: const pw.EdgeInsets.only(top: 20),
@@ -647,11 +657,19 @@ class PDFService {
             pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.center,
               children: [
-                pw.BarcodeWidget(
-                  barcode: pw.Barcode.qrCode(),
-                  data: upiLink,
-                  width: 100,
-                  height: 100,
+                pw.Container(
+                  decoration: pw.BoxDecoration(
+                    border: pw.Border.all(color: PdfColors.grey400, width: 2),
+                    borderRadius: pw.BorderRadius.circular(8),
+                  ),
+                  padding: const pw.EdgeInsets.all(8),
+                  child: pw.BarcodeWidget(
+                    barcode: pw.Barcode.qrCode(),
+                    data: upiLink,
+                    width: 100,
+                    height: 100,
+                    drawText: false,
+                  ),
                 ),
                 pw.SizedBox(height: 8),
                 pw.Text(
@@ -713,7 +731,8 @@ class PDFService {
         ),
       );
     } catch (e) {
-      // If QR generation fails, return empty widget
+      // If QR generation fails, log and return empty widget
+      print('  ❌ Error generating QR: $e');
       return pw.SizedBox();
     }
   }

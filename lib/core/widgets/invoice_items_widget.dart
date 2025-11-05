@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../features/product/domain/entities/product_entity.dart';
+import '../../features/invoice/domain/entities/invoice_entity.dart';
 import '../constants/app_colors.dart';
 import '../models/invoice_item.dart';
 import '../constants/document_constants.dart';
@@ -9,6 +10,7 @@ class InvoiceItemsWidget extends StatefulWidget {
   final List<ProductEntity> products;
   final Function(List<InvoiceItem>) onItemsChanged;
   final VoidCallback onAddNewProduct;
+  final InvoiceType? invoiceType; // Added to determine if stock validation is needed
 
   const InvoiceItemsWidget({
     super.key,
@@ -16,6 +18,7 @@ class InvoiceItemsWidget extends StatefulWidget {
     required this.products,
     required this.onItemsChanged,
     required this.onAddNewProduct,
+    this.invoiceType,
   });
 
   @override
@@ -42,6 +45,7 @@ class _InvoiceItemsWidgetState extends State<InvoiceItemsWidget> {
       context: context,
       builder: (context) => _AddItemDialog(
         products: widget.products,
+        invoiceType: widget.invoiceType,
         onAddProduct: widget.onAddNewProduct,
         onItemAdded: (item) {
           final updatedItems = List<InvoiceItem>.from(widget.items)..add(item);
@@ -57,6 +61,7 @@ class _InvoiceItemsWidgetState extends State<InvoiceItemsWidget> {
       context: context,
       builder: (context) => _AddItemDialog(
         products: widget.products,
+        invoiceType: widget.invoiceType,
         existingItem: item,
         onAddProduct: widget.onAddNewProduct,
         onItemAdded: (updatedItem) {
@@ -247,12 +252,14 @@ class _AddItemDialog extends StatefulWidget {
   final InvoiceItem? existingItem;
   final VoidCallback onAddProduct;
   final Function(InvoiceItem) onItemAdded;
+  final InvoiceType? invoiceType;
 
   const _AddItemDialog({
     required this.products,
     this.existingItem,
     required this.onAddProduct,
     required this.onItemAdded,
+    this.invoiceType,
   });
 
   @override
@@ -266,6 +273,22 @@ class _AddItemDialogState extends State<_AddItemDialog> {
   late TextEditingController _discountController;
   late String _discountType;
   late double _taxRate;
+
+  // Helper to determine if we should validate stock (only for SALES documents)
+  bool get _shouldValidateStock {
+    if (widget.invoiceType == null) return true; // Default to validation for safety
+    
+    // Sales documents - stock DECREASES, so validate
+    const salesDocuments = [
+      InvoiceType.invoice,
+      InvoiceType.salesOrder,
+      InvoiceType.deliveryChalan,
+      InvoiceType.proFormaInvoice,
+      InvoiceType.debitNote, // Returning to supplier - reduces your stock
+    ];
+    
+    return salesDocuments.contains(widget.invoiceType);
+  }
 
   @override
   void initState() {
@@ -315,9 +338,9 @@ class _AddItemDialogState extends State<_AddItemDialog> {
       return;
     }
 
-    // Stock Validation
+    // Stock Validation (only for SALES documents where stock decreases)
     final requestedQty = double.tryParse(_quantityController.text) ?? 0;
-    if (_selectedProduct!.trackStock && requestedQty > _selectedProduct!.stock) {
+    if (_shouldValidateStock && _selectedProduct!.trackStock && requestedQty > _selectedProduct!.stock) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -502,6 +525,7 @@ class _AddItemDialogState extends State<_AddItemDialog> {
                               helperStyle: TextStyle(
                                 color: _selectedProduct != null && 
                                        _selectedProduct!.trackStock &&
+                                       _shouldValidateStock &&
                                        (double.tryParse(_quantityController.text) ?? 0) > _selectedProduct!.stock
                                     ? Colors.red
                                     : Colors.grey,
