@@ -44,11 +44,11 @@ class _BillsPageState extends State<BillsPage> with SingleTickerProviderStateMix
         ),
         bottom: TabBar(
           controller: _tabController,
-          indicatorColor: AppColors.onPrimary,
+          indicatorColor: Colors.white,
           indicatorWeight: 3,
-          labelColor: AppColors.onPrimary,
+          labelColor: Colors.white,
           labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-          unselectedLabelColor: AppColors.onPrimary.withOpacity(0.7),
+          unselectedLabelColor: Colors.white.withOpacity(0.6),
           unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.normal),
           tabs: const [
             Tab(text: 'Sales'),

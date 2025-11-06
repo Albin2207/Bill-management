@@ -5,6 +5,8 @@ import 'firebase_options.dart';
 import 'core/di/service_locator.dart' as di;
 import 'core/navigation/app_router.dart';
 import 'core/constants/app_colors.dart';
+import 'core/theme/app_theme.dart';
+import 'core/theme/theme_provider.dart';
 import 'features/auth/presentation/providers/auth_provider.dart';
 import 'features/party/presentation/providers/party_provider.dart';
 import 'features/product/presentation/providers/product_provider.dart';
@@ -99,23 +101,22 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => di.sl<OnboardingProvider>(),
         ),
-      ],
-      child: MaterialApp(
-        title: 'Billing Management',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: AppColors.primary,
-            primary: AppColors.primary,
-            secondary: AppColors.secondary,
-            error: AppColors.error,
-            surface: AppColors.surface,
-          ),
-          useMaterial3: true,
-          scaffoldBackgroundColor: AppColors.background,
+        ChangeNotifierProvider(
+          create: (_) => di.sl<ThemeProvider>(),
         ),
-        initialRoute: AppRouter.splash,
-        onGenerateRoute: AppRouter.generateRoute,
+      ],
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, _) {
+          return MaterialApp(
+            title: 'Billing Management',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: themeProvider.themeMode,
+            initialRoute: AppRouter.splash,
+            onGenerateRoute: AppRouter.generateRoute,
+          );
+        },
       ),
     );
   }

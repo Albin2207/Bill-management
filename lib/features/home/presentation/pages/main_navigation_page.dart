@@ -53,7 +53,12 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
           currentIndex: _currentIndex,
           onTap: _onItemTapped,
           selectedItemColor: AppColors.primary,
-          unselectedItemColor: AppColors.onBackground.withOpacity(0.6),
+          unselectedItemColor: Theme.of(context).brightness == Brightness.dark
+              ? Colors.grey.shade400
+              : Colors.grey.shade600,
+          backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? const Color(0xFF1E1E1E)
+              : Colors.white,
           selectedFontSize: 12,
           unselectedFontSize: 12,
           items: const [

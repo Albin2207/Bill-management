@@ -63,6 +63,7 @@ import '../../features/onboarding/data/datasources/onboarding_local_datasource.d
 import '../../features/onboarding/data/repositories/onboarding_repository_impl.dart';
 import '../../features/onboarding/domain/repositories/onboarding_repository.dart';
 import '../../features/onboarding/presentation/providers/onboarding_provider.dart';
+import '../../core/theme/theme_provider.dart';
 
 final sl = GetIt.instance;
 
@@ -295,6 +296,11 @@ Future<void> init() async {
   // Providers
   sl.registerFactory(
     () => OnboardingProvider(repository: sl()),
+  );
+
+  // ========== Theme ==========
+  sl.registerLazySingleton(
+    () => ThemeProvider(sl()),
   );
 }
 

@@ -68,9 +68,26 @@ class _LedgerPageState extends State<LedgerPage> {
                 prefixIcon: const Icon(Icons.person),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: Theme.of(context).brightness == Brightness.dark
+                    ? const Color(0xFF2C2C2C)
+                    : Colors.white,
               ),
-              hint: const Text('Select a party to view ledger'),
+              dropdownColor: Theme.of(context).brightness == Brightness.dark
+                  ? const Color(0xFF2C2C2C)
+                  : Colors.white,
+              style: TextStyle(
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white
+                    : Colors.black87,
+              ),
+              hint: Text(
+                'Select a party to view ledger',
+                style: TextStyle(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.grey.shade400
+                      : Colors.grey.shade600,
+                ),
+              ),
               items: parties.map((party) {
                 return DropdownMenuItem(
                   value: party.id,
@@ -90,11 +107,22 @@ class _LedgerPageState extends State<LedgerPage> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.account_balance_wallet, size: 64, color: Colors.grey[400]),
+                        Icon(
+                          Icons.account_balance_wallet,
+                          size: 64,
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.grey.shade600
+                              : Colors.grey.shade400,
+                        ),
                         const SizedBox(height: 16),
                         Text(
                           'Select a party to view ledger',
-                          style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Theme.of(context).brightness == Brightness.dark
+                                ? Colors.grey.shade400
+                                : Colors.grey.shade600,
+                          ),
                         ),
                       ],
                     ),

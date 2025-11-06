@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- External storage -->
+    <external-path name="external_files" path="."/>
+    
+    <!-- Cache directory -->
+    <cache-path name="cache" path="."/>
+    
+    <!-- Internal storage -->
+    <files-path name="files" path="."/>
+    
+    <!-- External cache -->
+    <external-cache-path name="external_cache" path="."/>
+    
+    <!-- For PDFs, images, and other documents -->
+    <external-files-path name="external_storage_files" path="."/>
+</paths>
+

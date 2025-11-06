@@ -208,16 +208,21 @@ class _DocumentDetailsDialogState extends State<DocumentDetailsDialog> {
                     // Document Date
                     InkWell(
                       onTap: () => _selectDate(true),
-                      child: InputDecorator(
-                        decoration: const InputDecoration(
-                          labelText: 'Document Date',
-                          border: OutlineInputBorder(),
-                          suffixIcon: Icon(Icons.calendar_today),
+                        child: InputDecorator(
+                          decoration: const InputDecoration(
+                            labelText: 'Document Date',
+                            border: OutlineInputBorder(),
+                            suffixIcon: Icon(Icons.calendar_today),
+                          ),
+                          child: Text(
+                            DateFormat('dd MMM yyyy').format(_documentDate),
+                            style: TextStyle(
+                              color: Theme.of(context).brightness == Brightness.dark
+                                  ? Colors.white
+                                  : Colors.black87,
+                            ),
+                          ),
                         ),
-                        child: Text(
-                          DateFormat('dd MMM yyyy').format(_documentDate),
-                        ),
-                      ),
                     ),
                     const SizedBox(height: 16),
                     
@@ -235,6 +240,11 @@ class _DocumentDetailsDialogState extends State<DocumentDetailsDialog> {
                             _dueDate != null
                                 ? DateFormat('dd MMM yyyy').format(_dueDate!)
                                 : 'Select due date',
+                            style: TextStyle(
+                              color: Theme.of(context).brightness == Brightness.dark
+                                  ? Colors.white
+                                  : Colors.black87,
+                            ),
                           ),
                         ),
                       ),
@@ -292,7 +302,9 @@ class _DocumentDetailsDialogState extends State<DocumentDetailsDialog> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.grey.shade100,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? const Color(0xFF2C2C2C)
+                    : Colors.grey.shade100,
                 borderRadius: const BorderRadius.only(
                   bottomLeft: Radius.circular(12),
                   bottomRight: Radius.circular(12),

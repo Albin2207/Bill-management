@@ -383,10 +383,7 @@ class _AddItemDialogState extends State<_AddItemDialog> {
   @override
   Widget build(BuildContext context) {
     // Debug: Log product count
-    debugPrint('AddItemDialog - Products count: ${widget.products.length}');
-    if (widget.products.isNotEmpty) {
-      debugPrint('First product: ${widget.products.first.name}');
-    }
+    // Products available for selection
     
     return Dialog(
       child: Container(

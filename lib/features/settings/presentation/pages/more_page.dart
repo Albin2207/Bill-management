@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/navigation/app_router.dart';
+import '../../../../core/theme/theme_provider.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../business/presentation/providers/business_provider.dart';
 
@@ -246,6 +247,26 @@ class MorePage extends StatelessWidget {
               
               // Settings Section
               _buildSectionTitle('Settings'),
+              
+              // Theme Toggle
+              Consumer<ThemeProvider>(
+                builder: (context, themeProvider, _) {
+                  return _buildListTile(
+                    context,
+                    icon: themeProvider.isDarkMode ? Icons.dark_mode : Icons.light_mode,
+                    title: 'Theme',
+                    subtitle: themeProvider.isDarkMode ? 'Dark mode' : 'Light mode',
+                    trailing: Switch(
+                      value: themeProvider.isDarkMode,
+                      onChanged: (_) {
+                        themeProvider.toggleTheme();
+                      },
+                      activeColor: AppColors.primary,
+                    ),
+                  );
+                },
+              ),
+              
               _buildListTile(
                 context,
                 icon: Icons.security,
@@ -376,16 +397,18 @@ class MorePage extends StatelessWidget {
     required IconData icon,
     required String title,
     String? subtitle,
-    required VoidCallback onTap,
+    VoidCallback? onTap,
+    Widget? trailing,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        color: Colors.white,
+        color: isDark ? const Color(0xFF2C2C2C) : Colors.white,
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withOpacity(0.05),
+            color: (isDark ? Colors.black : AppColors.primary).withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -403,9 +426,10 @@ class MorePage extends StatelessWidget {
         ),
         title: Text(
           title,
-          style: const TextStyle(
+          style: TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 15,
+            color: isDark ? Colors.white : Colors.black87,
           ),
         ),
         subtitle: subtitle != null
@@ -413,11 +437,11 @@ class MorePage extends StatelessWidget {
                 subtitle,
                 style: TextStyle(
                   fontSize: 12,
-                  color: Colors.grey.shade600,
+                  color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
                 ),
               )
             : null,
-        trailing: Container(
+        trailing: trailing ?? Container(
           padding: const EdgeInsets.all(6),
           decoration: BoxDecoration(
             color: AppColors.primary.withOpacity(0.1),

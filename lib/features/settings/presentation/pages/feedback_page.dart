@@ -216,12 +216,22 @@ class _FeedbackPageState extends State<FeedbackPage> {
                 value: _selectedCategory,
                 decoration: InputDecoration(
                   filled: true,
-                  fillColor: Colors.grey.shade100,
+                  fillColor: Theme.of(context).brightness == Brightness.dark
+                      ? const Color(0xFF2C2C2C)
+                      : Colors.grey.shade100,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide.none,
                   ),
                   prefixIcon: Icon(Icons.category, color: AppColors.primary),
+                ),
+                dropdownColor: Theme.of(context).brightness == Brightness.dark
+                    ? const Color(0xFF2C2C2C)
+                    : Colors.white,
+                style: TextStyle(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : Colors.black87,
                 ),
                 items: _categories.map((category) {
                   return DropdownMenuItem(
@@ -248,10 +258,22 @@ class _FeedbackPageState extends State<FeedbackPage> {
               const SizedBox(height: 12),
               TextFormField(
                 controller: _subjectController,
+                style: TextStyle(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : Colors.black87,
+                ),
                 decoration: InputDecoration(
                   hintText: 'Brief summary of your feedback',
+                  hintStyle: TextStyle(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.grey.shade500
+                        : Colors.grey.shade600,
+                  ),
                   filled: true,
-                  fillColor: Colors.grey.shade100,
+                  fillColor: Theme.of(context).brightness == Brightness.dark
+                      ? const Color(0xFF2C2C2C)
+                      : Colors.grey.shade100,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide.none,
@@ -281,10 +303,22 @@ class _FeedbackPageState extends State<FeedbackPage> {
               TextFormField(
                 controller: _messageController,
                 maxLines: 6,
+                style: TextStyle(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : Colors.black87,
+                ),
                 decoration: InputDecoration(
                   hintText: 'Share your thoughts, suggestions, or issues...',
+                  hintStyle: TextStyle(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.grey.shade500
+                        : Colors.grey.shade600,
+                  ),
                   filled: true,
-                  fillColor: Colors.grey.shade100,
+                  fillColor: Theme.of(context).brightness == Brightness.dark
+                      ? const Color(0xFF2C2C2C)
+                      : Colors.grey.shade100,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide.none,

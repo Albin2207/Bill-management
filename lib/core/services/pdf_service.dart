@@ -612,15 +612,8 @@ class PDFService {
     // Get UPI ID from business profile or settings
     final upiId = business?.upiId ?? settings?.upiId;
     
-    // Debug print
-    print('🔍 PDF QR Code Debug:');
-    print('  UPI ID: $upiId');
-    print('  Business: ${business?.businessName}');
-    print('  Show QR Setting: ${settings?.showQRCode}');
-    
     // If no UPI ID, don't show QR code
     if (upiId == null || upiId.isEmpty) {
-      print('  ❌ No UPI ID found');
       return pw.SizedBox();
     }
 
@@ -732,7 +725,6 @@ class PDFService {
       );
     } catch (e) {
       // If QR generation fails, log and return empty widget
-      print('  ❌ Error generating QR: $e');
       return pw.SizedBox();
     }
   }

@@ -115,7 +115,7 @@ class _LoginPageState extends State<LoginPage> {
             Navigator.of(context).pushReplacementNamed(AppRouter.businessOnboarding);
           }
         } catch (e) {
-          debugPrint('Error loading business after sign in: $e');
+          // Error loading business data
           // On error, show business onboarding
           if (!mounted) return;
           Navigator.of(context).pushReplacementNamed(AppRouter.businessOnboarding);

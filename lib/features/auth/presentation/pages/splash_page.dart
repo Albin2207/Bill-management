@@ -75,7 +75,7 @@ class _SplashPageState extends State<SplashPage> {
             Navigator.of(context).pushReplacementNamed(AppRouter.businessOnboarding);
           }
         } catch (e) {
-          debugPrint('Error loading business: $e');
+          // Error loading business data
           // On error, show business onboarding to let user set up
           if (!mounted) return;
           Navigator.of(context).pushReplacementNamed(AppRouter.businessOnboarding);

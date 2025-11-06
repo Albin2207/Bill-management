@@ -924,28 +924,33 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   Widget _buildAnalyticsItem(String label, String value, IconData icon, {Color? color}) {
-    final iconColor = color ?? AppColors.primary;
-    return Column(
-      children: [
-        Icon(icon, color: iconColor, size: 32),
-        const SizedBox(height: 8),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: AppColors.onBackground,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            color: AppColors.onBackground.withOpacity(0.6),
-          ),
-        ),
-      ],
+    return Builder(
+      builder: (context) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        final iconColor = color ?? AppColors.primary;
+        return Column(
+          children: [
+            Icon(icon, color: iconColor, size: 32),
+            const SizedBox(height: 8),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 

@@ -17,9 +17,10 @@ class PrivacyPolicyPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildHeader(),
+            _buildHeader(context),
             const SizedBox(height: 24),
             _buildSection(
+              context,
               'Information We Collect',
               'We collect information you provide directly to us when you:\n'
               '• Create an account\n'
@@ -30,6 +31,7 @@ class PrivacyPolicyPage extends StatelessWidget {
               'invoices, payment records, and other data you enter into the app.',
             ),
             _buildSection(
+              context,
               'How We Use Your Information',
               'We use the information we collect to:\n'
               '• Provide, maintain, and improve our services\n'
@@ -40,6 +42,7 @@ class PrivacyPolicyPage extends StatelessWidget {
               '• Respond to your support requests',
             ),
             _buildSection(
+              context,
               'Data Storage and Security',
               'Your data is stored securely on Firebase Cloud Services with:\n'
               '• End-to-end encryption in transit\n'
@@ -51,6 +54,7 @@ class PrivacyPolicyPage extends StatelessWidget {
               'your information from unauthorized access, alteration, or disclosure.',
             ),
             _buildSection(
+              context,
               'Data Sharing',
               'We do NOT sell or rent your personal information to third parties. '
               'Your data may be accessed by:\n'
@@ -59,29 +63,34 @@ class PrivacyPolicyPage extends StatelessWidget {
               'These service providers are bound by strict data protection agreements.',
             ),
             _buildSection(
+              context,
               'Your Rights',
               'You have the right to:\n'
               '• Access your personal data stored in the app\n'
               '• Update or correct your information at any time\n'
-              '• Delete your account and all associated data\n'
-              '• Export your data in PDF or other formats\n'
-              '• Opt-out of non-essential communications',
+              '• Request account deletion by contacting us via email\n'
+              '• Export your invoices and reports in PDF format\n'
+              '• Skip providing optional data like bank/UPI details',
             ),
             _buildSection(
+              context,
               'Data Retention',
               'We retain your data for as long as your account is active. '
-              'When you delete your account:\n'
+              'To delete your account, contact us at thomasalbin35@gmail.com. '
+              'Upon account deletion:\n'
               '• All personal data is permanently deleted within 30 days\n'
               '• Backups are removed from all servers\n'
               '• Some data may be retained for legal compliance (e.g., GST records)',
             ),
             _buildSection(
+              context,
               'Children\'s Privacy',
               'Our service is not intended for users under the age of 18. '
               'We do not knowingly collect information from children. '
               'If you believe we have collected data from a minor, please contact us immediately.',
             ),
             _buildSection(
+              context,
               'Cookies and Tracking',
               'We use minimal tracking for:\n'
               '• Analytics to improve app performance\n'
@@ -90,6 +99,7 @@ class PrivacyPolicyPage extends StatelessWidget {
               'You can control analytics through your device settings.',
             ),
             _buildSection(
+              context,
               'Changes to Privacy Policy',
               'We may update this Privacy Policy from time to time. '
               'We will notify you of any material changes via:\n'
@@ -99,13 +109,14 @@ class PrivacyPolicyPage extends StatelessWidget {
               'Continued use of the app after changes indicates acceptance.',
             ),
             _buildSection(
+              context,
               'Contact Us',
               'If you have questions or concerns about this Privacy Policy or '
               'your data, please contact us:\n\n'
               '📧 Email: thomasalbin35@gmail.com',
             ),
             const SizedBox(height: 16),
-            _buildFooter(),
+            _buildFooter(context),
             const SizedBox(height: 32),
           ],
         ),
@@ -113,7 +124,7 @@ class PrivacyPolicyPage extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -140,11 +151,17 @@ class PrivacyPolicyPage extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          const Text(
+          Text(
             'We are committed to protecting your personal information and '
             'your right to privacy. This policy explains how we collect, '
             'use, and safeguard your data.',
-            style: TextStyle(fontSize: 14, height: 1.5),
+            style: TextStyle(
+              fontSize: 14,
+              height: 1.5,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.grey.shade300
+                  : Colors.black87,
+            ),
           ),
           const SizedBox(height: 8),
           Text(
@@ -160,7 +177,7 @@ class PrivacyPolicyPage extends StatelessWidget {
     );
   }
 
-  Widget _buildSection(String title, String content) {
+  Widget _buildSection(BuildContext context, String title, String content) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 24),
       child: Column(
@@ -177,10 +194,12 @@ class PrivacyPolicyPage extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             content,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               height: 1.6,
-              color: Colors.black87,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.grey.shade300
+                  : Colors.black87,
             ),
           ),
         ],
@@ -188,22 +207,29 @@ class PrivacyPolicyPage extends StatelessWidget {
     );
   }
 
-  Widget _buildFooter() {
+  Widget _buildFooter(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey.shade100,
+        color: isDark ? const Color(0xFF2C2C2C) : Colors.grey.shade100,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey.shade300),
+        border: Border.all(
+          color: isDark ? Colors.grey.shade700 : Colors.grey.shade300,
+        ),
       ),
       child: Row(
         children: [
           Icon(Icons.verified_user, color: AppColors.primary, size: 24),
           const SizedBox(width: 12),
-          const Expanded(
+          Expanded(
             child: Text(
               'By using Billing Management app, you agree to this Privacy Policy.',
-              style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
+              style: TextStyle(
+                fontSize: 12,
+                fontStyle: FontStyle.italic,
+                color: isDark ? Colors.grey.shade300 : Colors.black87,
+              ),
             ),
           ),
         ],

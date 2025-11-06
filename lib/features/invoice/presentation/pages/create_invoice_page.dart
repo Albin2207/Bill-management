@@ -61,11 +61,9 @@ class _CreateInvoicePageState extends State<CreateInvoicePage> {
     final productProvider = Provider.of<ProductProvider>(context, listen: false);
     
     final userId = authProvider.user?.uid;
-    debugPrint('Loading data for user: $userId');
     if (userId != null) {
       partyProvider.loadParties(userId);
       productProvider.loadProducts(userId);
-      debugPrint('Load initiated - Parties: ${partyProvider.parties.length}, Products: ${productProvider.products.length}');
     } else {
       debugPrint('No user ID found!');
     }
@@ -266,7 +264,6 @@ class _CreateInvoicePageState extends State<CreateInvoicePage> {
     ).toList();
     
     // Debug: Print product count
-    debugPrint('Products available: ${productProvider.products.length}');
     
     return Scaffold(
       appBar: AppBar(
@@ -391,10 +388,14 @@ class _CreateInvoicePageState extends State<CreateInvoicePage> {
           // Bottom Summary & Actions
           Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? const Color(0xFF1E1E1E)
+                  : Colors.white,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.grey.shade300,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.black.withOpacity(0.3)
+                      : Colors.grey.shade300,
                   blurRadius: 10,
                   offset: const Offset(0, -2),
                 ),
@@ -409,11 +410,14 @@ class _CreateInvoicePageState extends State<CreateInvoicePage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
+                        Text(
                           'Grand Total',
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
+                            color: Theme.of(context).brightness == Brightness.dark
+                                ? Colors.white
+                                : Colors.black87,
                           ),
                         ),
                         Text(

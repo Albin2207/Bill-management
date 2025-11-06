@@ -63,11 +63,9 @@ class _CreateSalesOrderPageState extends State<CreateSalesOrderPage> {
     final productProvider = Provider.of<ProductProvider>(context, listen: false);
     
     final userId = authProvider.user?.uid;
-    debugPrint('Loading data for user: $userId');
     if (userId != null) {
       partyProvider.loadParties(userId);
       productProvider.loadProducts(userId);
-      debugPrint('Load initiated - Parties: ${partyProvider.parties.length}, Products: ${productProvider.products.length}');
     } else {
       debugPrint('No user ID found!');
     }
@@ -271,7 +269,6 @@ class _CreateSalesOrderPageState extends State<CreateSalesOrderPage> {
       p.partyType == PartyType.customer || p.partyType == PartyType.both
     ).toList();
     
-    debugPrint('Products available: ${productProvider.products.length}');
     
     return Scaffold(
       appBar: AppBar(
